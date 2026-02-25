@@ -1,0 +1,17 @@
+{
+  "name": "agentcraftworks-opensource",
+  "version": "0.1.0",
+  "description": "Open Protocol for AI Agent Governance",
+  "private": true,
+  "workspaces": [
+    "typescript"
+  ],
+  "scripts": {
+    "build": "cd typescript && npm run build",
+    "typecheck": "cd typescript && npm run typecheck",
+    "test": "cd typescript && npm test"
+  },
+  "keywords": ["ai-agents", "governance", "mcp", "github-app"],
+  "author": "AICraftworks LLC",
+  "license": "MIT"
+}

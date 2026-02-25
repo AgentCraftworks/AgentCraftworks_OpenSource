@@ -1,0 +1,35 @@
+{
+  "name": "@agentcraftworks/core",
+  "version": "0.1.0",
+  "description": "Open Protocol for AI Agent Governance — engagement levels, handoff FSM, CODEOWNERS routing, MCP tools",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --external:express --external:@octokit/rest --external:@octokit/webhooks --external:dotenv --external:ajv --external:jsonwebtoken --external:express-rate-limit",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["ai-agents", "governance", "mcp", "github-app", "devops", "hackathon"],
+  "author": "AICraftworks LLC",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.2.3",
+    "esbuild": "^0.27.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@octokit/rest": "^22.0.1",
+    "@octokit/webhooks": "^14.2.0",
+    "ajv": "^8.17.1",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
