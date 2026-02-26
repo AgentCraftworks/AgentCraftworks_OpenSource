@@ -1,78 +1,60 @@
-# Contributing to AgentCraftworks Core
+# Contributing to AgentCraftworks Community Edition
 
-Thank you for your interest in contributing to AgentCraftworks! This document provides guidelines for contributing to the open-source core.
+Thank you for contributing! AgentCraftworks CE is an MIT-licensed open platform for agentic DevOps.
+
+## Contributor License Agreement
+
+**Before your first PR can be merged, you must sign the CLA.**
+
+When you open a pull request, the CLA Assistant bot will automatically check if you have signed. If not, it will post instructions. To sign, add a comment to your PR:
+
+> I have read the CLA Document and I hereby sign the CLA.
+
+Read the full [CLA here](.github/CLA.md). You only sign once.
+
+Why a CLA? It lets us dual-license community contributions into AgentCraftworks Enterprise while keeping CE MIT-licensed — the same model used by HashiCorp, GitLab, and MongoDB.
 
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/AgentCraftworks_OpenSource.git`
-3. Install dependencies: `cd typescript && npm install`
-4. Create a branch: `git checkout -b feature/your-feature`
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Make your changes (see development setup below)
+4. Run tests: `npm test`
+5. Open a pull request against `main`
 
 ## Development Setup
 
-### Prerequisites
-
-- Node.js 22+
-- npm 10+
-
-### Commands
-
 ```bash
+# Node.js 22+ required
 cd typescript
-npm install             # Install dependencies
-npm run build           # Build with esbuild
-npm run typecheck       # Type check with tsc --noEmit
-node --import tsx --test test/**/*.test.ts  # Run tests
+npm install
+npm run build
+npm test
 ```
 
-## Coding Standards
+## Code Style
 
-### TypeScript
+- TypeScript strict mode
+- Prefer `async/await` over callbacks
+- All public APIs must have JSDoc comments
+- New features require tests
 
-- **Strict mode**: `strict: true` in tsconfig.json
-- **Prefer `unknown`**: over `any`
-- **ES Modules**: Use `.js` extensions in imports
-- **Structured logging**: `{ msg, key: value }` pattern
+## What Belongs in CE vs Enterprise
 
-### Testing
+| CE (this repo) | Enterprise |
+|---|---|
+| Webhook routing + FSM | SRE incident response |
+| Autonomy Dial protocol | Self-healing orchestration |
+| MCP 6-tool interface | Chronicle AI ledger |
+| CODEOWNERS routing | Governance Monitor |
+| GitHub App scaffolding | CI autofix engine |
 
-- Use `node:test` (built-in Node.js test runner)
-- Use `node:assert/strict` for assertions
-- Each test file should have a clear describe/it structure
-- Integration tests use Express + fetch pattern with ephemeral servers (port 0)
+If your contribution adds Enterprise-tier functionality, it may not be accepted into CE — but we may offer to integrate it into Enterprise with attribution.
 
-### Architecture Standards
+## Reporting Issues
 
-Before implementing patterns covered by the architecture standards in `ArchitecturePatternsPractices/`, read the relevant document first:
-
-| Standard | When to Consult |
-|----------|-----------------|
-| Circuit Breaker | Adding retry logic or external service calls |
-| Handoff State Machine | Any handoff state transition changes |
-| Engagement Level Governance | Permission check or action tier code |
-
-## Pull Request Process
-
-1. Ensure all tests pass: `node --import tsx --test test/**/*.test.ts`
-2. Ensure type checking passes: `npm run typecheck`
-3. Write tests for new functionality
-4. Update documentation if needed
-5. Use conventional commit messages:
-   - `feat:` for new features
-   - `fix:` for bug fixes
-   - `test:` for test additions/changes
-   - `docs:` for documentation
-   - `refactor:` for code restructuring
-
-## Architecture Decision Records
-
-To deviate from a locked standard, create an ADR in `ArchitecturePatternsPractices/adr/` using the template.
-
-## Code of Conduct
-
-See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Use [GitHub Issues](../../issues) with the appropriate label.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree to the terms of the [Contributor License Agreement](.github/CLA.md). Your contributions will be licensed under the [MIT License](LICENSE).
