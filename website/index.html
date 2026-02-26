@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AgentCraftworks Core — Open-source framework for orchestrating multi-agent software development workflows using GitHub webhooks and the Model Context Protocol."
+    />
+    <title>AgentCraftworks Core</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
+        background: #0d1117;
+        color: #c9d1d9;
+        line-height: 1.6;
+      }
+
+      header {
+        background: #161b22;
+        border-bottom: 1px solid #30363d;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      header h1 {
+        font-size: 1.25rem;
+        color: #f0f6fc;
+        font-weight: 600;
+      }
+
+      header .badge {
+        background: #238636;
+        color: #fff;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .hero {
+        max-width: 900px;
+        margin: 5rem auto 3rem;
+        padding: 0 2rem;
+        text-align: center;
+      }
+
+      .hero h2 {
+        font-size: 2.75rem;
+        color: #f0f6fc;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        line-height: 1.2;
+      }
+
+      .hero p {
+        font-size: 1.15rem;
+        color: #8b949e;
+        max-width: 640px;
+        margin: 0 auto 2.5rem;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.65rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+
+      .btn:hover { opacity: 0.85; }
+
+      .btn-primary {
+        background: #238636;
+        color: #fff;
+      }
+
+      .btn-secondary {
+        background: #21262d;
+        color: #c9d1d9;
+        border: 1px solid #30363d;
+      }
+
+      .features {
+        max-width: 900px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .feature-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 1.5rem;
+      }
+
+      .feature-card h3 {
+        color: #f0f6fc;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .feature-card p {
+        color: #8b949e;
+        font-size: 0.9rem;
+      }
+
+      .levels {
+        max-width: 900px;
+        margin: 0 auto 4rem;
+        padding: 0 2rem;
+      }
+
+      .levels h2 {
+        color: #f0f6fc;
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+        font-weight: 600;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+
+      thead th {
+        background: #161b22;
+        color: #8b949e;
+        text-align: left;
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #30363d;
+        font-weight: 600;
+      }
+
+      tbody tr:hover { background: #161b22; }
+
+      tbody td {
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid #21262d;
+        color: #c9d1d9;
+      }
+
+      tbody td:first-child {
+        font-weight: 600;
+        color: #58a6ff;
+      }
+
+      footer {
+        border-top: 1px solid #21262d;
+        text-align: center;
+        padding: 2rem;
+        color: #484f58;
+        font-size: 0.85rem;
+      }
+
+      footer a { color: #58a6ff; text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>AgentCraftworks Core</h1>
+      <span class="badge">Open Source</span>
+    </header>
+
+    <section class="hero">
+      <h2>Orchestrate AI Agents<br />at the Speed of Code</h2>
+      <p>
+        An open-source GitHub App that automates multi-agent software development
+        workflows using webhook events, CODEOWNERS-based routing, and the Model
+        Context Protocol (MCP).
+      </p>
+      <div class="btn-group">
+        <a
+          href="https://github.com/AgentCraftworks/AgentCraftworks_OpenSource"
+          class="btn btn-primary"
+        >View on GitHub</a>
+        <a
+          href="https://github.com/AgentCraftworks/AgentCraftworks_OpenSource#quick-start"
+          class="btn btn-secondary"
+        >Quick Start</a>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="feature-card">
+        <h3>4-State Handoff FSM</h3>
+        <p>
+          Deterministic <code>pending → active → completed</code> state machine
+          with <code>failed</code> transitions from any non-terminal state.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>CODEOWNERS Routing</h3>
+        <p>
+          Automatically routes work to the right agent based on file paths
+          defined in your CODEOWNERS file.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>Engagement Level Governance</h3>
+        <p>
+          Five-tier permission system — from Observer (read-only) to Full Agent
+          Team (deploy & orchestrate) — with per-environment caps.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>MCP Server</h3>
+        <p>
+          Six built-in Model Context Protocol tools for creating, accepting,
+          completing, and querying agent handoffs.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>Action Classification</h3>
+        <p>
+          T1–T5 action tier system that maps every GitHub action to the minimum
+          engagement level required to perform it.
+        </p>
+      </div>
+      <div class="feature-card">
+        <h3>Secure Webhook Processing</h3>
+        <p>
+          Every incoming webhook is verified with HMAC-SHA256 before any
+          business logic runs.
+        </p>
+      </div>
+    </section>
+
+    <section class="levels">
+      <h2>Agent Engagement Levels</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Name</th>
+            <th>Action Tier</th>
+            <th>Permitted Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Observer</td>
+            <td>T1</td>
+            <td>Read, view, list</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Advisor</td>
+            <td>T2</td>
+            <td>Comment, suggest</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Peer Programmer</td>
+            <td>T3</td>
+            <td>Label, assign, approve, edit file</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Agent Team</td>
+            <td>T4</td>
+            <td>Merge, close, create branch, push commit</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Full Agent Team</td>
+            <td>T5</td>
+            <td>Deploy, modify CI, orchestrate agents</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <p>
+        &copy; 2025 AICraftworks LLC &mdash; Released under the
+        <a href="https://github.com/AgentCraftworks/AgentCraftworks_OpenSource/blob/main/LICENSE">MIT License</a>
+        &mdash;
+        <a href="https://github.com/AgentCraftworks/AgentCraftworks_OpenSource">GitHub</a>
+      </p>
+    </footer>
+  </body>
+</html>
