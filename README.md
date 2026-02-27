@@ -1,194 +1,174 @@
-# AgentCraftworks Core
+<div align="center">
 
-> Open-source framework for orchestrating multi-agent software development workflows using GitHub webhooks and the Model Context Protocol (MCP).
+# AgentCraftworks CE
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-22%2B-green.svg)](https://nodejs.org/)
+**The open protocol layer for agentic DevOps**
 
-## What is AgentCraftworks?
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node.js 22+](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/built%20with-TypeScript-blue)](https://www.typescriptlang.org)
+[![MCP Compatible](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io)
+[![Hackathon](https://img.shields.io/badge/Microsoft%20AI%20Dev%20Days-2026-orange)](https://github.com/Azure/AI-Dev-Days-Hackathon)
 
-AgentCraftworks is a **webhook-driven Express server** that automates software development workflows using intelligent AI agents. It listens for GitHub events (PR opened, review requested, etc.) and routes work to specialized AI agents via CODEOWNERS-based routing.
+[Quick Start](#quick-start) · [How It Works](#how-it-works) · [Enterprise](#enterprise-edition) · [Docs](#documentation) · [Contribute](#contributing)
 
-**This is NOT a CLI tool.** It is a GitHub App backend that orchestrates agent handoffs through a finite state machine.
+</div>
 
-### Key Features
+---
 
-- **4-State Handoff FSM**: `pending → active → completed` (with `failed` from any non-terminal state)
-- **CODEOWNERS-Based Routing**: Automatically routes work to the right agent based on file paths
-- **Engagement Level Governance**: 5-tier permission system (Observer → Full Agent Team)
-- **MCP Server**: 6 tools for agent orchestration via Model Context Protocol
-- **Action Classification**: T1-T5 tier system mapping actions to required engagement levels
-- **Webhook Signature Verification**: Secure GitHub webhook processing with HMAC-SHA256
+## The Problem
 
-## Quick Start
+AI coding agents are powerful — but completely ungoverned. They merge PRs without approval, push to production without validation, and operate at full autonomy with no safety net.
 
-### Prerequisites
+**You need a governance layer that grows with your team's trust.**
 
-- Node.js 22+
-- npm 10+
+## What AgentCraftworks CE Does
 
-### Installation
+AgentCraftworks CE is a GitHub App + MCP server that intercepts every agent action and routes it through a **configurable Autonomy Dial** before it reaches your codebase.
 
-```bash
-cd typescript
-npm install
+```
+Pull Request / Push Event
+         ↓
+  AgentCraftworks CE
+         ↓
+   Autonomy Dial (1–5)
+    ├── Level 1: Alert only
+    ├── Level 2: Suggest + comment  
+    ├── Level 3: Create fix PR
+    ├── Level 4: Auto-remediate
+    └── Level 5: Full autonomous deploy
+         ↓
+  CODEOWNERS Routing → Assigned Agent
+         ↓
+   MCP Tool Execution
+         ↓
+    GitHub Actions
 ```
 
-### Build & Type Check
+## Key Features
 
-```bash
-npm run build          # esbuild compilation (~50ms)
-npm run typecheck      # tsc --noEmit (strict mode)
-```
-
-### Run Tests
-
-```bash
-node --import tsx --test test/**/*.test.ts
-```
-
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GH_APP_ID` | Yes | GitHub App ID |
-| `GH_PRIVATE_KEY` | Yes | GitHub App private key (PEM) |
-| `GH_WEBHOOK_SECRET` | Yes | Webhook signature verification secret |
-| `PORT` | No | Server port (default: 3000) |
-| `NODE_ENV` | No | Environment (`local`, `dev`, `staging`, `production`) |
-
-> **Note:** Use `GH_*` prefix, NOT `GITHUB_*` (reserved by GitHub Actions).
+| Feature | Description |
+|---|---|
+| **Autonomy Dial** | 5-level governance control — set per-repo, per-team, per-event type |
+| **MCP 6-Tool Interface** | Standard MCP server: analyze, fix, review, comment, rollback, escalate |
+| **Finite State Machine** | Every agent action is a state transition — auditable, reproducible |
+| **CODEOWNERS Routing** | Events routed to the right agent based on ownership rules |
+| **Webhook Handling** | Handles GitHub PR, push, issue, and workflow events |
+| **GitHub App Scaffold** | Drop-in GitHub App: one install, works across all repos in your org |
 
 ## Architecture
 
-### Handoff State Machine
-
-```
-pending → active → completed
-  ↓         ↓
-failed    failed
-```
-
-- 4 states, 2 terminal (`completed`, `failed`)
-- `failed` uses reason prefixes: `rejected:*`, `abandoned:*`, `error:*`, `timeout:*`
-- `overdue` is a **computed property** (not a stored state)
-- Handoff IDs are UUIDs
-
-### Agent Engagement Levels (1-5)
-
-| Level | Name | Action Tier | Permitted Actions |
-|-------|------|-------------|-------------------|
-| 1 | Observer | T1 | Read, view, list |
-| 2 | Advisor | T2 | Comment, suggest |
-| 3 | Peer Programmer | T3 | Label, assign, approve, edit file |
-| 4 | Agent Team | T4 | Merge, close, create branch, push commit |
-| 5 | Full Agent Team | T5 | Deploy, modify CI, orchestrate agents |
-
-### Environment Caps
-
-| Environment | Max Level |
-|-------------|-----------|
-| local / dev | 5 (Full Agent Team) |
-| staging | 4 (Agent Team) |
-| production | 3 (Peer Programmer) |
-
-## MCP Server
-
-The MCP server exposes 6 tools for agent orchestration:
-
-| Tool | Description |
-|------|-------------|
-| `create_handoff` | Create a new agent handoff |
-| `accept_handoff` | Accept a pending handoff |
-| `complete_handoff` | Mark a handoff as completed with outputs |
-| `query_workflow_state` | Query handoff state and history |
-| `attach_context` | Attach structured context to a handoff |
-| `get_context` | Retrieve context for a handoff |
-
-### MCP Configuration (VS Code)
-
-Add to your `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "agentcraftworks": {
-      "command": "node",
-      "args": ["--import", "tsx", "typescript/src/mcp/server.ts"],
-      "env": {
-        "GH_APP_ID": "your-app-id",
-        "GH_PRIVATE_KEY": "your-private-key",
-        "GH_WEBHOOK_SECRET": "your-webhook-secret"
-      }
-    }
-  }
-}
+```mermaid
+graph TD
+    GH[GitHub Events] --> WH[Webhook Handler]
+    WH --> AD[Autonomy Dial FSM]
+    AD -->|Level 1-2| OBS[Observer/Advisor]
+    AD -->|Level 3| PR[Fix PR Creator]
+    AD -->|Level 4-5| AUTO[Auto-Remediation]
+    OBS --> MCP[MCP Server]
+    PR --> MCP
+    AUTO --> MCP
+    MCP --> GHA[GitHub Actions]
+    MCP --> API[GitHub API]
+    GHA --> PROD[Production]
 ```
 
-## Project Structure
+## Quick Start
 
-```
-typescript/
-├── src/
-│   ├── types/           # TypeScript type definitions
-│   │   ├── handoff.ts   # Handoff, StateChange, HandoffStats types
-│   │   ├── autonomy.ts  # Engagement levels, action tiers
-│   │   ├── context.ts   # Context service types
-│   │   └── index.ts     # Re-exports
-│   ├── utils/           # Core utilities
-│   │   ├── handoff-state-machine.ts  # 4-state FSM
-│   │   ├── codeowners.ts             # CODEOWNERS parser
-│   │   └── auth.ts                   # GitHub App auth
-│   ├── services/        # Business logic
-│   │   ├── handoff-service.ts    # Handoff CRUD + transitions
-│   │   ├── action-classifier.ts  # T1-T5 action classification
-│   │   ├── autonomy-dial.ts      # Engagement level management
-│   │   ├── context-service.ts    # Structured context storage
-│   │   └── context-schemas.ts    # JSON Schema validation
-│   ├── middleware/      # Express middleware
-│   │   ├── webhook-signature.ts   # HMAC-SHA256 verification
-│   │   └── permission-checker.ts  # Engagement level gating
-│   ├── handlers/        # Route handlers
-│   │   ├── pull-request.ts        # PR webhook processing
-│   │   ├── handoff-api.ts         # REST API for handoffs
-│   │   └── autonomy-dial-routes.ts # Autonomy dial API
-│   ├── mcp/             # Model Context Protocol
-│   │   ├── server.ts    # MCP tool implementations
-│   │   └── types.ts     # MCP-specific types
-│   └── index.ts         # Application entry point
-└── test/                # Test suite (node:test)
-    ├── handoff-state-machine.test.ts
-    ├── handoff-service.test.ts
-    ├── handoff-edge-cases.test.ts
-    ├── action-classifier.test.ts
-    ├── autonomy-dial-routes.test.ts
-    ├── codeowners-permission.test.ts
-    ├── context-service.test.ts
-    ├── mcp-server.test.ts
-    ├── pull-request.test.ts
-    ├── handoff-api.test.ts
-    ├── webhook-signature.test.ts
-    └── webhook-endpoint.test.ts
+```bash
+# Requirements: Node.js 22+, GitHub App credentials
+git clone https://github.com/AgentCraftworks/AgentCraftworks-CE.git
+cd AgentCraftworks-CE/typescript
+npm install
+
+# Configure environment
+cp .env.example .env
+# Add your GitHub App credentials (see docs/setup.md)
+
+# Build and start
+npm run build
+npm start
 ```
 
-## Coding Conventions
+**Webhook endpoint:** `POST /api/webhook`  
+**Health check:** `GET /health`  
+**MCP tools:** `GET /mcp/tools`
 
-- **Runtime**: Node.js 22+ with ES Modules
-- **Build**: esbuild for compilation, `tsc --noEmit` for type checking
-- **Testing**: `node --import tsx --test test/**/*.test.ts`
-- **Types**: Use `unknown` over `any`, strict null checks enabled
-- **Logging**: Structured `{ msg, key: value }` pattern
-- **GitHub API**: Use `octokit.request()`, NOT `.rest.*` methods (Octokit v16+)
+## How It Works
+
+### 1. Autonomy Dial
+Every repo gets an autonomy level (1–5). The dial determines what the agent is allowed to do:
+
+- **Level 1 – Observer:** Watch and alert. No action taken.
+- **Level 2 – Advisor:** Post comments and suggestions.
+- **Level 3 – Peer Programmer:** Open fix PRs for human review.
+- **Level 4 – Agent Team:** Auto-remediate with human escalation fallback.
+- **Level 5 – Full Agent Team:** Fully autonomous including deploy.
+
+### 2. Finite State Machine
+Every incoming event follows a deterministic state machine:
+`RECEIVED → CLASSIFIED → GOVERNANCE_CHECK → ROUTED → EXECUTING → COMPLETE`
+
+This makes every agent action **auditable and reproducible** — essential for enterprise compliance.
+
+### 3. MCP-Compatible
+CE ships a fully compliant Model Context Protocol (MCP) server. Any MCP-capable AI client (GitHub Copilot, Claude, GPT-4) can connect and use the 6 core tools directly.
+
+## Enterprise Edition
+
+AgentCraftworks Enterprise adds the reliability and governance layer that production teams need:
+
+| Capability | CE | Enterprise |
+|---|:---:|:---:|
+| Autonomy Dial (1–5) | ✅ | ✅ |
+| MCP 6-tool interface | ✅ | ✅ |
+| Webhook + FSM routing | ✅ | ✅ |
+| CODEOWNERS routing | ✅ | ✅ |
+| **SRE Incident Response** | ❌ | ✅ |
+| **Self-Healing Orchestrator** | ❌ | ✅ |
+| **CI Autofix Engine** | ❌ | ✅ |
+| **Chronicle AI Audit Ledger** | ❌ | ✅ |
+| **Governance Monitor** | ❌ | ✅ |
+| **Azure Monitor Integration** | ❌ | ✅ |
+| **Real-time Dashboard** | ❌ | ✅ |
+| **Copilot Agent Dispatch** | ❌ | ✅ |
+| **Enterprise Source Access (ESAP)** | ❌ | ✅ Add-on |
+| SLA + dedicated support | ❌ | ✅ |
+
+**→ [Talk to us about Enterprise](mailto:enterprise@agentcraftworks.io)**
+
+## Documentation
+
+- [Setup Guide](docs/setup.md)
+- [Autonomy Dial Reference](docs/autonomy-dial.md)
+- [MCP Tool Reference](docs/mcp-tools.md)
+- [Architecture Overview](docs/architecture.md)
+- [Contributing Guide](CONTRIBUTING.md)
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) first — all contributors must sign our [CLA](.github/CLA.md).
 
-## Security
+```bash
+# Run tests
+cd typescript && npm test
 
-See [SECURITY.md](SECURITY.md) for vulnerability reporting.
+# Lint
+npm run lint
+```
 
 ## License
 
-[MIT](LICENSE)
+MIT License — Copyright (c) 2025 AICraftworks LLC
+
+See [LICENSE](LICENSE) for full text.
+
+---
+
+<div align="center">
+
+Built with ❤️ for the agentic DevOps era · Powered by Azure + GitHub Copilot
+
+[Enterprise](mailto:enterprise@agentcraftworks.io) · [Issues](../../issues) · [Discussions](../../discussions)
+
+</div>

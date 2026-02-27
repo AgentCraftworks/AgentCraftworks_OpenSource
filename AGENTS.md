@@ -31,8 +31,8 @@ AgentCraftworks_OpenSource/
 
 ```bash
 cd typescript && npm install
-npm run build          # esbuild compilation
 npm run typecheck      # tsc --noEmit
+npm run build          # esbuild compilation
 node --import tsx --test test/**/*.test.ts
 ```
 
