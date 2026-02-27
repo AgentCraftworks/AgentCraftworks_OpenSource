@@ -48,12 +48,16 @@ jobs:
       - name: Compute org content hashes
         id: hashes
         run: |
-          ORG_AGENTS_HASH=$(sha256sum /tmp/org-agents.md | cut -d' ' -f1)
-          ORG_COPILOT_HASH=$(sha256sum /tmp/org-copilot.md | cut -d' ' -f1)
+          # Extract only the ORG-STANDARD sections from org files so the hashes
+          # are comparable to the sections extracted from the local files
+          sed -n '/<!-- ORG-STANDARD:BEGIN/,/<!-- ORG-STANDARD:END/p' /tmp/org-agents.md > /tmp/org-agents-section.md
+          sed -n '/<!-- ORG-STANDARD:BEGIN/,/<!-- ORG-STANDARD:END/p' /tmp/org-copilot.md > /tmp/org-copilot-section.md
+          ORG_AGENTS_HASH=$(sha256sum /tmp/org-agents-section.md | cut -d' ' -f1)
+          ORG_COPILOT_HASH=$(sha256sum /tmp/org-copilot-section.md | cut -d' ' -f1)
           echo "org_agents_hash=$ORG_AGENTS_HASH" >> $GITHUB_OUTPUT
           echo "org_copilot_hash=$ORG_COPILOT_HASH" >> $GITHUB_OUTPUT
-          echo "Org AGENTS.md hash: $ORG_AGENTS_HASH"
-          echo "Org Copilot hash: $ORG_COPILOT_HASH"
+          echo "Org AGENTS.md section hash: $ORG_AGENTS_HASH"
+          echo "Org Copilot section hash: $ORG_COPILOT_HASH"
 
       - name: Extract embedded org sections from local files
         id: local
