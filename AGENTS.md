@@ -82,6 +82,75 @@ failed    failed
 | `attach_context` | Attach structured context to a handoff |
 | `get_context` | Retrieve context for a handoff |
 
+## Security Requirements for Workflows & Authentication
+
+> **MANDATORY — all agents must follow these rules when creating or modifying GitHub Actions workflows, authentication, or infrastructure code.**
+
+### Authentication Hierarchy (most secure → least)
+
+| Priority | Method | Use Case | Required |
+|----------|--------|----------|----------|
+| 1 | **OIDC Federated Credentials** | Azure login in GitHub Actions | ✅ Always |
+| 2 | **GitHub App Token** (`actions/create-github-app-token@v1`) | T3+ agent workflows that write (branches, commits, PRs) | ✅ For T3+ |
+| 3 | **`GITHUB_TOKEN`** (automatic) | T1-T2 agent workflows (read, comment) | ✅ For T1-T2 |
+
+### Prohibited Practices
+
+- ❌ **Never use Personal Access Tokens (PATs)** — use GitHub App Tokens instead
+- ❌ **Never store Azure credentials as secrets** — use OIDC federated credentials (`id-token: write`)
+- ❌ **Never use `secrets.GITHUB_TOKEN` for T3+ agents** — use `actions/create-github-app-token` instead (commits from `GITHUB_TOKEN` don't trigger downstream workflows)
+- ❌ **Never create workflows without a `permissions:` block** — always declare least-privilege permissions
+- ❌ **Never hardcode secrets, tokens, or credentials** in workflow files or source code
+
+### GitHub App Token Pattern (required for T3+ agents)
+
+```yaml
+steps:
+  - name: Generate GitHub App Token
+    id: app-token
+    uses: actions/create-github-app-token@v1
+    with:
+      app-id: ${{ secrets.GH_APP_ID }}
+      private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+  - name: Checkout with App Token
+    uses: actions/checkout@v6
+    with:
+      token: ${{ steps.app-token.outputs.token }}
+
+  - name: Run agent job
+    env:
+      GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+    run: npx tsx src/jobs/your-job.ts
+```
+
+### Azure OIDC Pattern (required for all Azure deployments)
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+
+steps:
+  - name: Azure Login (OIDC)
+    uses: azure/login@v2
+    with:
+      client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+```
+
+### Workflow Requirements Checklist
+
+When creating or modifying any `.github/workflows/*.yml` file:
+
+- [ ] `permissions:` block is present with least-privilege scopes
+- [ ] No PATs — use GitHub App Token or `GITHUB_TOKEN`
+- [ ] Azure auth uses OIDC (no `AZURE_CREDENTIALS` secret)
+- [ ] Deploy workflows specify `environment:` for protection rules
+- [ ] `actions/checkout` uses `@v6` (not older versions)
+- [ ] Agent engagement level (T1-T5) is documented in workflow header comment
+
 ## Key Gotchas
 
 1. Sub-millisecond timing in tests: add small delays (`setTimeout(r, 10)`) when comparing timestamps
