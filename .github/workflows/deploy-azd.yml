@@ -64,23 +64,23 @@ jobs:
           azd env set GH_APP_PRIVATE_KEY "${{ secrets.GH_APP_PRIVATE_KEY }}"
 
       - name: Run azd (provision + deploy)
-        if: contains(github.event.inputs.action, 'up')
+        if: github.event.inputs.action == 'up (provision + deploy)'
         run: azd up --no-prompt
 
       - name: Run azd provision (infrastructure only)
-        if: contains(github.event.inputs.action, 'provision')
+        if: github.event.inputs.action == 'provision (infrastructure only)'
         run: azd provision --no-prompt
 
       - name: Run azd deploy (app only)
-        if: contains(github.event.inputs.action, 'deploy')
+        if: github.event.inputs.action == 'deploy (app only)'
         run: azd deploy --no-prompt
 
       - name: Run azd down (destroy)
-        if: contains(github.event.inputs.action, 'down')
+        if: github.event.inputs.action == 'down (destroy all resources)'
         run: azd down --force --purge --no-prompt
 
       - name: Output environment values
-        if: "!contains(github.event.inputs.action, 'down')"
+        if: github.event.inputs.action != 'down (destroy all resources)'
         run: azd env get-values | grep -E "URL|HOST|NAME"
 
   smoke-tests:
