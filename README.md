@@ -10,7 +10,7 @@
 [![MCP Compatible](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io)
 [![Hackathon](https://img.shields.io/badge/Microsoft%20AI%20Dev%20Days-2026-orange)](https://github.com/Azure/AI-Dev-Days-Hackathon)
 
-[Quick Start](#quick-start) · [How It Works](#how-it-works) · [Enterprise](#enterprise-edition) · [Docs](#documentation) · [Contribute](#contributing)
+[Quick Start](#quick-start) · [How It Works](#how-it-works) · [Enterprise](#enterprise-edition) · [Early Adopters](#early-adopter-program) · [Docs](#documentation) · [Contribute](#contributing)
 
 </div>
 
@@ -137,12 +137,24 @@ AgentCraftworks Enterprise adds the reliability and governance layer that produc
 
 **→ [Talk to us about Enterprise](mailto:enterprise@agentcraftworks.io)**
 
+## Early Adopter Program
+
+**We're looking for 5–10 platform engineering teams to beta test AgentCraftworks.**
+
+Early adopters get:
+- Free CE access + **90-day free Enterprise Beta** (invite only)
+- Direct channel with the founding team
+- Early adopter badge + attribution in docs
+
+→ **[Sign up here](https://github.com/AgentCraftworks/AgentCraftworks-CE/issues/new?template=early-adopter-signup.yml)** or see the [Early Adopter Program docs](docs/early-adopters.md) for full details.
+
 ## Documentation
 
 - [Setup Guide](docs/setup.md)
 - [Autonomy Dial Reference](docs/autonomy-dial.md)
 - [MCP Tool Reference](docs/mcp-tools.md)
 - [Architecture Overview](docs/architecture.md)
+- [Early Adopter Program](docs/early-adopters.md)
 - [Contributing Guide](CONTRIBUTING.md)
 
 ## Contributing
@@ -169,6 +181,6 @@ See [LICENSE](LICENSE) for full text.
 
 Built with ❤️ for the agentic DevOps era · Powered by Azure + GitHub Copilot
 
-[Enterprise](mailto:enterprise@agentcraftworks.io) · [Issues](../../issues) · [Discussions](../../discussions)
+[Enterprise](mailto:enterprise@agentcraftworks.io) · [Early Adopters](https://github.com/AgentCraftworks/AgentCraftworks-CE/issues/new?template=early-adopter-signup.yml) · [Issues](../../issues) · [Discussions](../../discussions)
 
 </div>
