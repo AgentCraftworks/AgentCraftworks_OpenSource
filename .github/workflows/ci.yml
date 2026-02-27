@@ -2,8 +2,17 @@ name: TypeScript CI
 
 on:
   push:
+    branches-ignore:
+      - main
+      - staging
   pull_request:
+    branches:
+      - staging
+      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
