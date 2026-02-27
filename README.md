@@ -135,7 +135,7 @@ AgentCraftworks Enterprise adds the reliability and governance layer that produc
 | **Enterprise Source Access (ESAP)** | ❌ | ✅ Add-on |
 | SLA + dedicated support | ❌ | ✅ |
 
-**→ [Talk to us about Enterprise](mailto:enterprise@agentcraftworks.io)**
+**→ [Talk to us about Enterprise](mailto:enterprise@agentcraftworks.com)**
 
 ## Early Adopter Program
 
@@ -181,6 +181,6 @@ See [LICENSE](LICENSE) for full text.
 
 Built with ❤️ for the agentic DevOps era · Powered by Azure + GitHub Copilot
 
-[Enterprise](mailto:enterprise@agentcraftworks.io) · [Early Adopters](https://github.com/AgentCraftworks/AgentCraftworks-CE/issues/new?template=early-adopter-signup.yml) · [Issues](../../issues) · [Discussions](../../discussions)
+[Enterprise](mailto:enterprise@agentcraftworks.com) · [Early Adopters](https://github.com/AgentCraftworks/AgentCraftworks-CE/issues/new?template=early-adopter-signup.yml) · [Issues](../../issues) · [Discussions](../../discussions)
 
 </div>
