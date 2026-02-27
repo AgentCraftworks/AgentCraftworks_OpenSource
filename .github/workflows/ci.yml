@@ -1,39 +1,21 @@
-name: CI
+name: TypeScript CI
 
 on:
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22]
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Type check
-        working-directory: typescript
-        run: npm run typecheck
-
-      - name: Build
-        working-directory: typescript
-        run: npm run build
-
-      - name: Run tests
-        working-directory: typescript
-        run: node --import tsx --test test/**/*.test.ts
+          cache-dependency-path: typescript/package-lock.json
+      - run: npm ci
+      - run: npm -w typescript run typecheck
+      - run: npm -w typescript run build
+      - run: npm -w typescript test

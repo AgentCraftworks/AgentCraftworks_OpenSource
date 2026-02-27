@@ -1,0 +1,50 @@
+name: "GH-AW: Daily Test Improver"
+
+# Daily Test Improver — Identifies test coverage gaps and suggests new tests.
+# Runs daily, analyzes source files without corresponding tests, and opens an issue
+# with specific test suggestions.
+# Engagement Level: T2 (Advisor) — creates issues with suggestions, no code edits.
+
+on:
+  schedule:
+    # Run at 9 AM UTC on weekdays
+    - cron: "0 9 * * 1-5"
+
+  workflow_dispatch:
+    inputs:
+      target_directory:
+        description: "Directory to analyze (default: typescript/src)"
+        required: false
+        default: "typescript/src"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  analyze-coverage:
+    name: Analyze Test Coverage Gaps
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Analyze and suggest tests
+        working-directory: typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          TARGET_DIR: ${{ github.event.inputs.target_directory || 'typescript/src' }}
+        run: npx tsx src/jobs/daily-test-improver.ts

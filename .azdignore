@@ -1,0 +1,43 @@
+# Azure Developer CLI ignore file
+# Files and directories listed here will not be included in deployments
+
+.git/
+.github/
+.vscode/
+.idea/
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+test/
+tests/
+*.test.ts
+*.test.js
+
+# Build artifacts
+node_modules/
+dist/
+bin/
+obj/
+
+# Temporary files
+tmp/
+temp/
+*.log
+*.tmp
+
+# Environment files (secrets should be in Key Vault)
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
