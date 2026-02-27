@@ -81,7 +81,7 @@ jobs:
 
       - name: Output environment values
         if: github.event.inputs.action != 'down (destroy all resources)'
-        run: azd env get-values | grep -E "URL|HOST|NAME"
+        run: azd env get-values | grep -E "URL|HOST|NAME" | sed 's/=.*/=<REDACTED>/'
 
   smoke-tests:
     name: Run Smoke Tests
