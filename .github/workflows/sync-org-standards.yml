@@ -2,7 +2,7 @@ name: "Sync Org Standards"
 
 # Checks for drift between embedded org-wide agent instructions in this repo
 # and the source of truth in AgentCraftworks/.github.
-# Opens a PR if the embedded sections are out of date.
+# Opens an issue if the embedded sections are out of date.
 
 on:
   schedule:
