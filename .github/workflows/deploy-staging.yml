@@ -1,11 +1,13 @@
-name: Deploy to Production
+name: Deploy to Staging
 
 on:
   push:
     branches:
-      - main
-    tags:
-      - "v*"
+      - staging
+  pull_request:
+    branches:
+      - staging
+    types: [closed]
   workflow_dispatch:
 
 env:
@@ -14,9 +16,10 @@ env:
 
 jobs:
   build-and-deploy-typescript:
-    name: Build & Deploy TypeScript Service
+    name: Build & Deploy TypeScript Service (Staging)
     runs-on: ubuntu-latest
-    environment: production
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    environment: staging
     permissions:
       contents: read
       packages: write
@@ -37,10 +40,9 @@ jobs:
         id: meta
         run: |
           SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
-          REF_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
-          TAGS="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:${REF_NAME} ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:sha-${SHA_SHORT}"
+          TAGS="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:staging ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:sha-${SHA_SHORT}"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
-          echo "version=${REF_NAME}" >> $GITHUB_OUTPUT
+          echo "version=staging" >> $GITHUB_OUTPUT
 
       - name: Build and push with ACR
         uses: azure/CLI@v2
@@ -49,12 +51,12 @@ jobs:
           inlineScript: |
             az acr build \
               --registry ${{ secrets.AZURE_ACR_NAME }} \
-              --image ${{ env.TYPESCRIPT_IMAGE_NAME }}:${{ steps.meta.outputs.version }} \
+              --image ${{ env.TYPESCRIPT_IMAGE_NAME }}:staging \
               --image ${{ env.TYPESCRIPT_IMAGE_NAME }}:sha-$(echo "${{ github.sha }}" | cut -c1-7) \
               --file ./typescript/Dockerfile \
               ./typescript
 
-      - name: Deploy to Azure Container Apps
+      - name: Deploy to Azure Container Apps (Staging)
         uses: azure/CLI@v2
         with:
           azcliversion: latest
@@ -62,10 +64,10 @@ jobs:
             az containerapp update \
               --name ${{ secrets.AZURE_CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --image ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+              --image ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:staging
 
   smoke-tests:
-    name: Run Smoke Tests
+    name: Run Smoke Tests (Staging)
     needs: build-and-deploy-typescript
     runs-on: ubuntu-latest
     permissions:
@@ -85,15 +87,15 @@ jobs:
 
       - name: Run TypeScript smoke tests
         env:
-          BASE_URL: ${{ secrets.TYPESCRIPT_PROD_URL }}
+          BASE_URL: ${{ secrets.TYPESCRIPT_STAGING_URL }}
         run: npx -w typescript tsx smoke-test.ts
 
       - name: Notify on success
         if: success()
-        run: echo "✅ All smoke tests passed in production!"
+        run: echo "✅ All smoke tests passed in staging!"
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "❌ Smoke tests failed in production!"
+          echo "❌ Smoke tests failed in staging!"
           exit 1

@@ -1,21 +1,125 @@
+name: Deploy Infrastructure (azd)
+
+# Infrastructure provisioning for new environments.
+# Run manually to provision Azure resources via Azure Developer CLI.
+# Uses OIDC federated credentials — no stored Azure secrets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+      action:
+        description: "Action to perform"
+        required: true
+        type: choice
+        options:
+          - up (provision + deploy)
+          - provision (infrastructure only)
+          - deploy (app only)
+          - down (destroy all resources)
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
+    name: "azd ${{ github.event.inputs.action }} → ${{ github.event.inputs.environment }}"
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Initialize or select azd environment
+        uses: actions/checkout@v6
+
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Select or create azd environment
         run: |
-          azd env select cae-agentcraftworks-ce || azd env new cae-agentcraftworks-ce --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} --location ${{ secrets.AZURE_LOCATION }}
-      # other steps remain unchanged
+          ENV_NAME="agentcraftworks-${{ github.event.inputs.environment }}"
+          azd env select "$ENV_NAME" 2>/dev/null || \
+            azd env new "$ENV_NAME" \
+              --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+              --location "${{ secrets.AZURE_LOCATION }}"
+
+      - name: Configure environment secrets
+        run: |
+          azd env set GH_APP_ID "${{ secrets.GH_APP_ID }}"
+          azd env set GH_WEBHOOK_SECRET "${{ secrets.GH_WEBHOOK_SECRET }}"
+          azd env set GH_APP_PRIVATE_KEY "${{ secrets.GH_APP_PRIVATE_KEY }}"
+
+      - name: Run azd (provision + deploy)
+        if: github.event.inputs.action == 'up (provision + deploy)'
+        run: azd up --no-prompt
+
+      - name: Run azd provision (infrastructure only)
+        if: github.event.inputs.action == 'provision (infrastructure only)'
+        run: azd provision --no-prompt
+
+      - name: Run azd deploy (app only)
+        if: github.event.inputs.action == 'deploy (app only)'
+        run: azd deploy --no-prompt
+
+      - name: Run azd down (destroy)
+        if: github.event.inputs.action == 'down (destroy all resources)'
+        run: azd down --force --purge --no-prompt
+
+      - name: Output environment values
+        if: github.event.inputs.action != 'down (destroy all resources)'
+        run: azd env get-values | grep -E "URL|HOST|NAME" | sed 's/=.*/=<REDACTED>/'
 
   smoke-tests:
+    name: Run Smoke Tests
     needs: deploy
     runs-on: ubuntu-latest
+    if: "!contains(github.event.inputs.action, 'down')"
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Initialize or select azd environment
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install azd
+        uses: Azure/setup-azd@v2
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get app URL
+        id: env
         run: |
-          azd env select cae-agentcraftworks-ce || azd env new cae-agentcraftworks-ce --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} --location ${{ secrets.AZURE_LOCATION }}
-      # other steps remain unchanged
+          ENV_NAME="agentcraftworks-${{ github.event.inputs.environment }}"
+          azd env select "$ENV_NAME"
+          APP_URL=$(azd env get-values | grep TYPESCRIPT_APP_URL | cut -d'=' -f2 | tr -d '"')
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke tests
+        env:
+          BASE_URL: ${{ steps.env.outputs.app_url }}
+        run: npx -w typescript tsx smoke-test.ts
