@@ -35,4 +35,4 @@ You only need to sign once across all AgentCraftworks repositories.
 
 ---
 
-Questions? Contact: legal@agentcraftworks.io
+Questions? Contact: legal@agentcraftworks.com
