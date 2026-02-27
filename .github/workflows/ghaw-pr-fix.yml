@@ -1,0 +1,54 @@
+name: "GH-AW: PR Fix"
+
+# PR Fix — Auto-suggests fixes for failing PR checks.
+# When a PR's CI fails, analyzes the logs and posts suggested fixes as review comments.
+# Engagement Level: T2 (Advisor) — posts review comments with suggestions, no direct edits.
+
+on:
+  check_run:
+    types: [completed]
+
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to analyze"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: read
+
+jobs:
+  suggest-fixes:
+    name: Suggest PR Fixes
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.check_run.conclusion == 'failure' &&
+       github.event.check_run.pull_requests[0] != null)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Analyze and suggest fixes
+        working-directory: typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.check_run.pull_requests[0].number || github.event.inputs.pr_number }}
+          CHECK_RUN_ID: ${{ github.event.check_run.id || '' }}
+          REPOSITORY: ${{ github.repository }}
+        run: npx tsx src/jobs/pr-fix.ts

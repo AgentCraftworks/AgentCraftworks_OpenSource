@@ -1,0 +1,45 @@
+name: "GH-AW: Workflow Health Manager"
+
+# Workflow Health Manager — Monitors workflow health and reports issues.
+# Checks all GH-AW workflows for failures, stale runs, and performance regressions.
+# Posts a health summary as a GitHub issue when problems are detected.
+# Engagement Level: T2 (Advisor) — creates issues with health reports, no modifications.
+
+on:
+  schedule:
+    # Run at 7 AM UTC on weekdays (before standup)
+    - cron: "0 7 * * 1-5"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  health-check:
+    name: Workflow Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Check workflow health
+        working-directory: typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: npx tsx src/jobs/workflow-health-manager.ts

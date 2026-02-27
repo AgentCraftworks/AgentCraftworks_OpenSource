@@ -1,0 +1,54 @@
+name: "GH-AW: CI Coach"
+
+# CI Coach — Analyzes CI failures and suggests fixes as PR comments.
+# Triggered when a workflow run fails. Posts analysis to the associated PR.
+# Engagement Level: T2 (Advisor) — posts comments, no code modifications.
+
+on:
+  workflow_run:
+    workflows: ["TypeScript CI"]
+    types: [completed]
+
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Workflow run ID to analyze"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+  checks: read
+
+jobs:
+  analyze-failure:
+    name: Analyze CI Failure
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'failure'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Analyze failure and post comment
+        working-directory: typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || github.event.inputs.run_id }}
+          REPOSITORY: ${{ github.repository }}
+        run: npx tsx src/jobs/ci-coach.ts

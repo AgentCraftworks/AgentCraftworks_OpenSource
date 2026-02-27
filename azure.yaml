@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: agentcraftworks-ce
+metadata:
+  template: agentcraftworks-ce@0.1.0
+
+services:
+  typescript-api:
+    project: ./typescript
+    language: js
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ./typescript
+    env:
+      PORT: 3000
+      NODE_ENV: production
+
+# Infrastructure resources
+resources:
+  - name: postgres
+    type: postgres
+    uses:
+      - typescript-api
+
+  - name: redis
+    type: redis
+    uses:
+      - typescript-api
+
+hooks:
+  # Run smoke tests after deployment
+  postdeploy:
+    shell: sh
+    run: |
+      echo "Running smoke tests against production..."
+      cd typescript && npm ci && BASE_URL="${TYPESCRIPT_API_URL}" npx tsx smoke-test.ts

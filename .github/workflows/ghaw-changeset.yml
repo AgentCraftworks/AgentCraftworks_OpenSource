@@ -1,0 +1,54 @@
+name: "GH-AW: Changeset"
+
+# Changeset — Automated version bumps and changelog generation.
+# Analyzes merged PRs since last release, determines semver bump, updates CHANGELOG.md.
+# Engagement Level: T3 (Peer Programmer) — creates branches and edits files.
+
+on:
+  push:
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview changes without committing"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changeset:
+    name: Generate Changeset
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Generate changeset
+        working-directory: typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: npx tsx src/jobs/changeset.ts

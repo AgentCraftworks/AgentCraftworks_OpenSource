@@ -1,0 +1,47 @@
+name: "GH-AW: CLI Consistency Checker"
+
+# CLI Consistency Checker — Validates CLI interface consistency across the project.
+# Checks that API endpoints, MCP tools, and CLI commands follow naming conventions.
+# Engagement Level: T2 (Advisor) — posts PR comments with findings, no code edits.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "typescript/src/handlers/**"
+      - "typescript/src/mcp/**"
+      - "typescript/src/jobs/**"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-consistency:
+    name: Check CLI Consistency
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: typescript
+        run: npm ci
+
+      - name: Check consistency
+        working-directory: typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+          REPOSITORY: ${{ github.repository }}
+        run: npx tsx src/jobs/cli-consistency-checker.ts
