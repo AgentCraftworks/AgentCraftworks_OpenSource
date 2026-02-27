@@ -1,0 +1,133 @@
+name: "Sync Org Standards"
+
+# Checks for drift between embedded org-wide agent instructions in this repo
+# and the source of truth in AgentCraftworks/.github.
+# Opens a PR if the embedded sections are out of date.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Weekly Monday 8AM UTC
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-sync:
+    name: Check Org Standards Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Checkout this repo
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Fetch org-wide AGENTS.md
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api repos/AgentCraftworks/.github/contents/AGENTS.md \
+            -H "Accept: application/vnd.github.raw" > /tmp/org-agents.md
+
+      - name: Fetch org-wide Copilot instructions
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api "repos/AgentCraftworks/.github/contents/.github/copilot/instructions.md" \
+            -H "Accept: application/vnd.github.raw" > /tmp/org-copilot.md
+
+      - name: Compute org content hashes
+        id: hashes
+        run: |
+          ORG_AGENTS_HASH=$(sha256sum /tmp/org-agents.md | cut -d' ' -f1)
+          ORG_COPILOT_HASH=$(sha256sum /tmp/org-copilot.md | cut -d' ' -f1)
+          echo "org_agents_hash=$ORG_AGENTS_HASH" >> $GITHUB_OUTPUT
+          echo "org_copilot_hash=$ORG_COPILOT_HASH" >> $GITHUB_OUTPUT
+          echo "Org AGENTS.md hash: $ORG_AGENTS_HASH"
+          echo "Org Copilot hash: $ORG_COPILOT_HASH"
+
+      - name: Extract embedded org sections from local files
+        id: local
+        run: |
+          # Extract content between ORG-STANDARD markers from AGENTS.md
+          sed -n '/<!-- ORG-STANDARD:BEGIN/,/<!-- ORG-STANDARD:END/p' AGENTS.md > /tmp/local-agents-section.md
+          # Extract content between ORG-STANDARD markers from copilot instructions
+          sed -n '/<!-- ORG-STANDARD:BEGIN/,/<!-- ORG-STANDARD:END/p' .github/copilot/instructions.md > /tmp/local-copilot-section.md
+
+          LOCAL_AGENTS_HASH=$(sha256sum /tmp/local-agents-section.md | cut -d' ' -f1)
+          LOCAL_COPILOT_HASH=$(sha256sum /tmp/local-copilot-section.md | cut -d' ' -f1)
+          echo "local_agents_hash=$LOCAL_AGENTS_HASH" >> $GITHUB_OUTPUT
+          echo "local_copilot_hash=$LOCAL_COPILOT_HASH" >> $GITHUB_OUTPUT
+
+      - name: Check for drift
+        id: drift
+        run: |
+          DRIFT="false"
+
+          if [ "${{ steps.hashes.outputs.org_agents_hash }}" != "${{ steps.local.outputs.local_agents_hash }}" ]; then
+            echo "⚠️ AGENTS.md org-standard section has drifted"
+            DRIFT="true"
+          else
+            echo "✅ AGENTS.md org-standard section is in sync"
+          fi
+
+          if [ "${{ steps.hashes.outputs.org_copilot_hash }}" != "${{ steps.local.outputs.local_copilot_hash }}" ]; then
+            echo "⚠️ Copilot instructions org-standard section has drifted"
+            DRIFT="true"
+          else
+            echo "✅ Copilot instructions org-standard section is in sync"
+          fi
+
+          echo "drift=$DRIFT" >> $GITHUB_OUTPUT
+
+      - name: Create sync issue if drifted
+        if: steps.drift.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          # Check if an open sync issue already exists
+          EXISTING=$(gh issue list --label "org-standards-sync" --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$EXISTING" ]; then
+            echo "Sync issue #$EXISTING already exists, adding comment"
+            gh issue comment "$EXISTING" --body "🔄 Weekly check: org standards are still out of sync ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          else
+            gh issue create \
+              --title "🔄 Org standards drift detected — update embedded agent instructions" \
+              --label "org-standards-sync" \
+              --body "## Org Standards Drift Detected
+
+The embedded org-wide agent instructions in this repo have drifted from the source of truth at [AgentCraftworks/.github](https://github.com/AgentCraftworks/.github).
+
+### What to update
+Look for sections between \`<!-- ORG-STANDARD:BEGIN -->\` and \`<!-- ORG-STANDARD:END -->\` markers in:
+- \`AGENTS.md\`
+- \`.github/copilot/instructions.md\`
+
+Replace those sections with the latest content from:
+- https://github.com/AgentCraftworks/.github/blob/main/AGENTS.md
+- https://github.com/AgentCraftworks/.github/blob/main/.github/copilot/instructions.md
+
+### Why this matters
+This is a public repo that may be cloned — cloners don't get org-level inheritance, so the embedded copy must stay current.
+
+---
+*Auto-generated by the sync-org-standards workflow.*"
+          fi
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.drift.outputs.drift }}" == "true" ]; then
+            echo "::warning::Org standards have drifted. An issue has been created."
+          else
+            echo "✅ All org standards are in sync."
+          fi
