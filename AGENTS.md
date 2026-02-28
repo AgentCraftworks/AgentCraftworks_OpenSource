@@ -79,6 +79,24 @@ The TypeScript implementation exposes an MCP (Model Context Protocol) server wit
 2. `abandonHandoff` format: `abandoned:reason` (no space after colon)
 3. TypeScript `dist/` is gitignored — only source is committed
 
+## Organization Repository Boundaries
+
+The AgentCraftworks org separates **Product**, **Platform Operations**, and **Business Operations** into distinct repos with different audiences, credentials, and agent behavior rules.
+
+| Domain | Repos | Audience | Auth |
+|--------|-------|----------|------|
+| **Product** | `AgentCraftworks`, `AgentCraftworks-CE`, `AgentCraftworks-VSCode`, `AgentCraftworks_WebSite` | Customers, contributors | Product App (`GH_APP_ID`) |
+| **Platform Operations** | `AgentCraftworks-PlatformOps` | Engineering team | Internal Ops App (`GH_OPS_APP_ID`) |
+| **Business Operations** | `AgentCraftworks-BizOps` | Business team | TBD |
+
+### Rules for agents in THIS repo (Product)
+
+1. **Never use ops credentials** (`GH_OPS_APP_ID`) — those belong to PlatformOps
+2. **Never create internal cost reports here** — those go to PlatformOps issues
+3. **GH-AW workflows** (`ghaw-*` prefix) belong here — product CI/CD automation
+4. **Ops workflows** (`ops-*` prefix) belong in `AgentCraftworks-PlatformOps`
+5. **Product app credentials** (`GH_APP_ID` / `GH_APP_PRIVATE_KEY`) are for customer-facing webhook processing only
+
 ---
 
 <!-- ORG-STANDARD:BEGIN — Synced from https://github.com/AgentCraftworks/.github/blob/main/AGENTS.md -->
