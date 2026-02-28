@@ -1,5 +1,9 @@
 name: CLA Assistant
 
+# Manages Contributor License Agreement signatures via PR comments.
+# Stores signatures in the cla-signatures branch and comments on PRs.
+# Engagement Level: T3 (Peer Programmer) — writes CLA signature files and PR comments.
+
 on:
   issue_comment:
     types: [created]
