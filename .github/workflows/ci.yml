@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: typescript/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm -w typescript run typecheck
       - run: npm -w typescript run build
