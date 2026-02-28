@@ -91,6 +91,7 @@ After deployment, update your GitHub App webhook URL to `https://<your-url>/api/
    - Metadata: Read-only
    - Checks: Read & Write
    - Commit statuses: Read & Write
+   - Actions: Read-only
 4. **Subscribe to events:** Pull request, Pull request review, Issues, Issue comment, Push
 5. Click **Create GitHub App**
 6. Note the **App ID**
@@ -107,6 +108,61 @@ After deployment, update your GitHub App webhook URL to `https://<your-url>/api/
 2. Click **Install**
 3. Choose your organization or account
 4. Select repos (or all repos)
+
+### Configure Repository Secrets for GitHub Actions Workflows
+
+Several workflows use `actions/create-github-app-token@v1` to generate short-lived
+tokens at runtime, replacing long-lived PATs. These workflows **will fail** if
+the secrets below are not configured.
+
+#### Workflows that require `GH_APP_ID` + `GH_APP_PRIVATE_KEY`
+
+| Workflow | File | Why It Needs App Token |
+|----------|------|-----------------------|
+| **CLA Assistant** | `cla.yml` | Write to PR comments, store CLA signatures |
+| **Changeset** | `ghaw-changeset.yml` | Create version branches/PRs that trigger downstream CI |
+| **Org Standards Sync** | `sync-org-standards.yml` | Read from org `.github` repo, create drift issues |
+| **Infrastructure Deploy** | `deploy-azd.yml` | Pass App credentials to Azure deployment |
+
+#### Step-by-Step: Add the Secrets
+
+1. **Find your App ID:**
+   - Go to **https://github.com/settings/apps** (or org: **https://github.com/organizations/AgentCraftworks/settings/apps**)
+   - Click your app → the **App ID** is shown near the top of the "General" page
+
+2. **Get your Private Key:**
+   - On the same app settings page, scroll to **Private keys**
+   - If you already generated one, use the downloaded `.pem` file
+   - If not, click **Generate a private key** and save the `.pem` file
+
+3. **Add secrets to the repository:**
+   - Go to **https://github.com/AgentCraftworks/AgentCraftworks-CE/settings/secrets/actions**
+   - Click **New repository secret**
+
+   | Secret Name | Value |
+   |-------------|-------|
+   | `GH_APP_ID` | The numeric App ID (e.g., `123456`) |
+   | `GH_APP_PRIVATE_KEY` | The **entire** contents of the `.pem` file, including `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----` headers |
+
+   > **Tip:** To copy the full PEM contents on macOS/Linux: `cat your-app.pem | pbcopy`
+   > On Windows PowerShell: `Get-Content your-app.pem -Raw | Set-Clipboard`
+
+4. **Verify the secrets are set:**
+   - Go to **Settings → Secrets and variables → Actions**
+   - You should see both `GH_APP_ID` and `GH_APP_PRIVATE_KEY` listed (values are hidden)
+
+5. **Test by re-running a workflow:**
+   - Go to **Actions** → select the failing workflow run → click **Re-run all jobs**
+   - The `generate-token` step should now succeed
+
+> **Why GitHub App Token instead of PAT?** App tokens are short-lived (1 hour),
+> scoped to the installed repos, auditable, and don't consume a user's token quota.
+> They are the recommended approach for GitHub Actions. See [GitHub docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow).
+
+> **Organization-level alternative:** If you want all repos in the org to share one
+> App Token, set `GH_APP_ID` and `GH_APP_PRIVATE_KEY` as **organization secrets**
+> at **https://github.com/organizations/AgentCraftworks/settings/secrets/actions**
+> instead of per-repository.
 
 ---
 
@@ -296,14 +352,14 @@ Configure these in **Settings → Secrets and variables → Actions → New repo
 | `AZURE_ENV_NAME` | Deployment environment name | `agentcraftworks-prod` |
 | `AZURE_LOCATION` | Azure region | `eastus` |
 
-### GitHub App
+### GitHub App (Required for CI/CD Workflows)
 
-| Secret | Description |
-|--------|-------------|
-| `GH_WEBHOOK_SECRET` | Webhook validation secret (generate: `openssl rand -hex 32`) |
-| `GH_APP_ID` | GitHub App ID (from app settings page) |
-| `GH_APP_PRIVATE_KEY` | Full PEM file contents including headers |
-| `POSTGRES_PASSWORD` | PostgreSQL admin password (generate: `openssl rand -base64 32`) |
+| Secret | Description | Required By |
+|--------|-------------|-------------|
+| `GH_APP_ID` | GitHub App ID (from app settings page) | `cla.yml`, `ghaw-changeset.yml`, `sync-org-standards.yml`, `deploy-azd.yml` |
+| `GH_APP_PRIVATE_KEY` | Full PEM file contents including headers | Same as above |
+| `GH_WEBHOOK_SECRET` | Webhook validation secret (generate: `openssl rand -hex 32`) | Runtime only (not CI/CD) |
+| `POSTGRES_PASSWORD` | PostgreSQL admin password (generate: `openssl rand -base64 32`) | `deploy-azd.yml` |
 
 ### For deploy-production.yml (Docker-based deploy)
 
