@@ -124,6 +124,7 @@ AgentCraftworks Enterprise adds the reliability and governance layer that produc
 | MCP 6-tool interface | ✅ | ✅ |
 | Webhook + FSM routing | ✅ | ✅ |
 | CODEOWNERS routing | ✅ | ✅ |
+| **Accessibility Enforcement** (WCAG 2.2 AA) | ✅ | ✅ |
 | **SRE Incident Response** | ❌ | ✅ |
 | **Self-Healing Orchestrator** | ❌ | ✅ |
 | **CI Autofix Engine** | ❌ | ✅ |
@@ -154,6 +155,7 @@ Early adopters get:
 - [Autonomy Dial Reference](docs/autonomy-dial.md)
 - [MCP Tool Reference](docs/mcp-tools.md)
 - [Architecture Overview](docs/architecture.md)
+- [Accessibility Capability](docs/accessibility.md)
 - [Early Adopter Program](docs/early-adopters.md)
 - [Contributing Guide](CONTRIBUTING.md)
 
