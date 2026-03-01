@@ -23,7 +23,7 @@ Accessibility is a **first-class requirement** — equal in priority to Security
 ### When to engage the accessibility agent team
 
 Always engage `@accessibility-lead` before generating or modifying:
-- Any UI component (`.jsx`, `.tsx`, `.vue`, `.html`, `.css`)
+- Any UI component (`.jsx`, `.tsx`, `.vue`, `.svelte`, `.html`, `.css`, `.scss`, `.less`)
 - Any documentation (`.md`, VPAT, release notes)
 - Any design system token or theme change
 

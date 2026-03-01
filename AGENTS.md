@@ -111,7 +111,7 @@ Accessibility is a **first-class requirement** in AgentCraftworks — equal in p
 
 This project integrates the [Community-Access/accessibility-agents](https://github.com/Community-Access/accessibility-agents) open-source agent team. These agents enforce WCAG AA standards and must be engaged for all UI/UX work.
 
-**Core web accessibility agents** (engage for any `.jsx`, `.tsx`, `.vue`, `.html`, `.css` changes):
+**Core web accessibility agents** (engage for any `.jsx`, `.tsx`, `.vue`, `.svelte`, `.html`, `.css`, `.scss`, `.less` changes):
 
 | Agent | Role |
 |-------|------|
@@ -135,6 +135,8 @@ This project integrates the [Community-Access/accessibility-agents](https://gith
 |-------|------|
 | `@markdown-a11y-assistant` | Markdown audit — links, alt text, headings, tables, emoji, anchors |
 | `@word-accessibility` | Microsoft Word (DOCX) document accessibility scanning |
+| `@excel-accessibility` | Microsoft Excel (XLSX) spreadsheet accessibility scanning |
+| `@powerpoint-accessibility` | Microsoft PowerPoint (PPTX) presentation accessibility scanning |
 | `@pdf-accessibility` | PDF conformance per PDF/UA and the Matterhorn Protocol |
 
 **GitHub workflow agents** (always active):

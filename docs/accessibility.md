@@ -16,9 +16,9 @@ AgentCraftworks solves this by treating accessibility as a **non-negotiable engi
 
 ## The Accessibility Agent Team
 
-AgentCraftworks integrates 55+ specialized agents from [Community-Access/accessibility-agents](https://github.com/Community-Access/accessibility-agents) across three teams:
+AgentCraftworks integrates 31 specialized agents from [Community-Access/accessibility-agents](https://github.com/Community-Access/accessibility-agents) across three teams:
 
-### Web Accessibility Team (26 agents)
+### Web Accessibility Team (16 agents)
 
 These agents enforce WCAG 2.2 AA standards for web code:
 
@@ -52,7 +52,7 @@ These agents enforce WCAG 2.2 AA standards for web code:
 | `@pdf-accessibility` | PDF conformance per PDF/UA and the Matterhorn Protocol |
 | `@epub-accessibility` | ePub document accessibility per EPUB Accessibility 1.1 |
 
-### GitHub Workflow Team (12 agents)
+### GitHub Workflow Team (5 agents)
 
 These agents handle GitHub repository management and triage:
 
@@ -64,7 +64,7 @@ These agents handle GitHub repository management and triage:
 | `@daily-briefing` | Morning overview of open accessibility issues, PR queue, CI status |
 | `@insiders-a11y-tracker` | Track accessibility changes in VS Code Insiders and custom repos |
 
-### Developer Tools Team (6 agents)
+### Developer Tools Team (4 agents)
 
 | Agent | Role |
 |-------|------|
