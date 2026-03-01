@@ -14,6 +14,51 @@
 
 ---
 
+## Accessibility-First Development
+
+Accessibility is a **first-class requirement** — equal in priority to Security and Quality. This applies to all UI, documentation, and user-facing content.
+
+> ⚠️ AI tools are not perfect. Always verify with VoiceOver, NVDA, JAWS, and keyboard-only navigation. Automated checks are a starting point, not a substitute for real assistive technology testing.
+
+### When to engage the accessibility agent team
+
+Always engage `@accessibility-lead` before generating or modifying:
+- Any UI component (`.jsx`, `.tsx`, `.vue`, `.html`, `.css`)
+- Any documentation (`.md`, VPAT, release notes)
+- Any design system token or theme change
+
+### Core accessibility requirements (WCAG 2.2 AA)
+
+- **Keyboard navigation**: All interactive elements must be keyboard-accessible (tab, arrow keys, Enter, Escape)
+- **Color contrast**: 4.5:1 for text, 3:1 for UI components and focus indicators
+- **ARIA**: Only use ARIA when native HTML semantics are insufficient; always set required states/properties
+- **Focus management**: Dialogs and modals must trap focus; return focus to trigger on close
+- **Forms**: Every input must have an associated `<label>`; errors must be programmatically associated
+- **Images**: Meaningful images need descriptive alt text; decorative images use `alt=""`
+- **Headings and landmarks**: Use semantic heading hierarchy (h1→h2→h3); include landmark regions
+
+### Accessibility specialists (from Community-Access/accessibility-agents)
+
+| Agent | Invoke when |
+|-------|-------------|
+| `@accessibility-lead` | Any UI work — orchestrates all other specialists |
+| `@aria-specialist` | Custom widgets, roles, states, properties |
+| `@contrast-master` | Color tokens, themes, focus indicators |
+| `@keyboard-navigator` | Focus order, skip links, SPA routing |
+| `@forms-specialist` | Form labels, validation, error messages |
+| `@modal-specialist` | Dialogs, drawers, popovers |
+| `@markdown-a11y-assistant` | Any `.md` documentation changes |
+
+### Never
+
+- ❌ Never merge UI changes without `@accessibility-lead` sign-off in staging/production
+- ❌ Never use color alone to convey information
+- ❌ Never set `tabindex > 0` (breaks natural focus order)
+- ❌ Never add `aria-label` to elements that already have visible text labels
+- ❌ Never use placeholder text as a substitute for `<label>`
+
+---
+
 <!-- ORG-STANDARD:BEGIN — Synced from https://github.com/AgentCraftworks/.github/blob/main/.github/copilot/instructions.md -->
 <!-- Do not edit this section manually. It is updated by the sync-org-standards workflow. -->
 

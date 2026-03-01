@@ -99,6 +99,106 @@ The AgentCraftworks org separates **Product**, **Platform Operations**, and **Bu
 
 ---
 
+## Accessibility Requirements
+
+> **MANDATORY — all agents must follow these rules when creating or modifying any UI, documentation, or user-facing content.**
+
+Accessibility is a **first-class requirement** in AgentCraftworks — equal in priority to Security and Quality. Every agent team operating in Community Edition or Enterprise must treat WCAG 2.2 AA conformance as a non-negotiable baseline.
+
+> ⚠️ **AI tools are not perfect.** They miss things, make mistakes, and cannot replace testing with real screen readers and assistive technology. Always verify with VoiceOver, NVDA, JAWS, and keyboard-only navigation. Agent tooling is a helpful starting point, not a substitute for real accessibility testing.
+
+### Accessibility Agent Team
+
+This project integrates the [Community-Access/accessibility-agents](https://github.com/Community-Access/accessibility-agents) open-source agent team. These agents enforce WCAG AA standards and must be engaged for all UI/UX work.
+
+**Core web accessibility agents** (engage for any `.jsx`, `.tsx`, `.vue`, `.html`, `.css` changes):
+
+| Agent | Role |
+|-------|------|
+| `@accessibility-lead` | Orchestrator — decides which specialists to invoke and runs the final review |
+| `@aria-specialist` | ARIA roles, states, properties, widget patterns; enforces the first rule of ARIA |
+| `@modal-specialist` | Dialogs, drawers, popovers — focus trapping, focus return, escape behavior |
+| `@contrast-master` | Color contrast ratios, dark mode, focus indicators, color independence |
+| `@keyboard-navigator` | Tab order, focus management, skip links, SPA route changes |
+| `@live-region-controller` | Dynamic content announcements, toasts, loading states |
+| `@forms-specialist` | Labels, errors, validation, fieldsets, autocomplete, multi-step wizards |
+| `@alt-text-headings` | Alt text, SVGs, icons, heading hierarchy, landmarks, page titles |
+| `@tables-data-specialist` | Table markup, scope, caption, sortable columns, ARIA grids |
+| `@link-checker` | Ambiguous link text, "click here" detection, missing new-tab warnings |
+| `@cognitive-accessibility` | WCAG 2.2 cognitive SC, COGA guidance, plain language, auth UX |
+| `@mobile-accessibility` | React Native, Expo, iOS, Android touch targets and screen readers |
+| `@design-system-auditor` | Color token contrast, focus ring tokens, Tailwind/MUI/Chakra/shadcn |
+
+**Documentation accessibility** (engage for `.md`, `.pdf`, `.docx`, `.xlsx`, `.pptx` changes):
+
+| Agent | Role |
+|-------|------|
+| `@markdown-a11y-assistant` | Markdown audit — links, alt text, headings, tables, emoji, anchors |
+| `@word-accessibility` | Microsoft Word (DOCX) document accessibility scanning |
+| `@pdf-accessibility` | PDF conformance per PDF/UA and the Matterhorn Protocol |
+
+**GitHub workflow agents** (always active):
+
+| Agent | Role |
+|-------|------|
+| `@pr-review` | PR diff analysis with accessibility confidence scoring |
+| `@issue-tracker` | Accessibility issue triage — priority scoring, duplicate detection |
+
+### Accessibility Requirements Checklist
+
+When creating or modifying any UI, documentation, or user-facing content:
+
+- [ ] WCAG 2.2 AA conformance verified by `@accessibility-lead`
+- [ ] All interactive elements are keyboard-navigable
+- [ ] Color contrast ratios meet AA minimums (4.5:1 text, 3:1 UI components)
+- [ ] ARIA roles/states used correctly (first rule of ARIA: don't use ARIA if native HTML suffices)
+- [ ] Focus management correct for dialogs, modals, and dynamic content
+- [ ] All images have meaningful alt text (or `alt=""` for decorative)
+- [ ] Forms have associated labels and clear error messages
+- [ ] Markdown documentation passes `@markdown-a11y-assistant` review
+
+### Installation
+
+Install the accessibility agent team locally:
+
+```bash
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/Community-Access/accessibility-agents/main/install.sh | bash
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/Community-Access/accessibility-agents/main/install.ps1 | iex
+```
+
+### Enforcement
+
+The `ghaw-accessibility-review` workflow automatically posts an accessibility checklist comment on every PR that touches UI files. The `@accessibility-lead` agent must sign off before merging any UI change in staging or production environments.
+
+---
+
+## PlatformOps Cross-Organization Sync
+
+> **Planning item** — AgentCraftworks operates multiple GitHub organizations. The following policy ensures accessibility (and all other engineering standards) remain in sync across orgs.
+
+### Sync Strategy
+
+The `sync-org-standards` workflow in each product repo detects drift in the `<!-- ORG-STANDARD:BEGIN/END -->` sections of `AGENTS.md` and `.github/copilot/instructions.md` by comparing SHA-256 hashes against the source of truth in `AgentCraftworks/.github`.
+
+**For cross-org sync (AgentCraftworks → AgentCraftworks-PlatformOps and other orgs):**
+
+1. The `AgentCraftworks/.github` repo is the single source of truth for all org-wide standards (security, accessibility, quality).
+2. Every product repo (`AgentCraftworks-CE`, `AgentCraftworks`, `AgentCraftworks-VSCode`) embeds the `ORG-STANDARD` sections and runs `sync-org-standards` weekly.
+3. `AgentCraftworks-PlatformOps` must also embed the `ORG-STANDARD` sections and run an equivalent `ops-sync-standards` workflow pointing to the same source of truth.
+4. When the source of truth is updated (e.g., adding accessibility requirements), all repos detect drift within one week and open a sync issue.
+
+### Requirements
+
+- [ ] `AgentCraftworks-PlatformOps` adds the same `ORG-STANDARD:BEGIN/END` markers to its `AGENTS.md` and `copilot/instructions.md`
+- [ ] `AgentCraftworks-PlatformOps` adds an `ops-sync-standards.yml` workflow equivalent to `sync-org-standards.yml` in this repo
+- [ ] All future org-wide standards (accessibility, security, quality) are authored first in `AgentCraftworks/.github/AGENTS.md` and propagated via the sync workflows
+- [ ] The accessibility agent team (above) is listed in all repos including `AgentCraftworks-PlatformOps` so internal engineering always keeps Accessibility front and center
+
+---
+
 <!-- ORG-STANDARD:BEGIN — Synced from https://github.com/AgentCraftworks/.github/blob/main/AGENTS.md -->
 <!-- Do not edit this section manually. It is updated by the sync-org-standards workflow. -->
 
