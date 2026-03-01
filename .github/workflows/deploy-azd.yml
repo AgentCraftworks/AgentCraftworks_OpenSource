@@ -69,11 +69,23 @@ jobs:
       - name: Configure environment secrets
         env:
           GH_APP_PRIVATE_KEY_VALUE: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          POSTGRES_PASSWORD_SECRET: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           azd env set ghAppId "${{ secrets.GH_APP_ID }}"
           azd env set ghWebhookSecret "${{ secrets.GH_WEBHOOK_SECRET }}"
           azd env set ghAppPrivateKey "$GH_APP_PRIVATE_KEY_VALUE"
-          azd env set postgresPassword "$(openssl rand -base64 32)"
+
+          # Prefer a stable password from POSTGRES_PASSWORD secret when provided.
+          if [ -n "$POSTGRES_PASSWORD_SECRET" ]; then
+            azd env set postgresPassword "$POSTGRES_PASSWORD_SECRET"
+          else
+            # If already set in azd env, keep existing value; otherwise generate once.
+            if azd env get-values | grep -q '^postgresPassword='; then
+              echo "::notice::postgresPassword already set in azd environment; leaving unchanged."
+            else
+              azd env set postgresPassword "$(openssl rand -base64 32)"
+            fi
+          fi
 
       - name: Run azd (provision + deploy)
         if: github.event.inputs.action == 'up (provision + deploy)'
