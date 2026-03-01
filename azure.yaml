@@ -11,7 +11,8 @@ services:
     host: containerapp
     docker:
       path: ./Dockerfile
-      context: ./typescript
+      # Context is relative to the service project directory.
+      context: .
     env:
       PORT: 3000
       NODE_ENV: production
