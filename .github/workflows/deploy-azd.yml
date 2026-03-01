@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     outputs:
-      app_url: ${{ steps.capture-app-url.outputs.app_url }}
+      app_url: ${{ steps.capture_app_url.outputs.app_url }}
 
     steps:
       - name: Checkout
@@ -120,7 +120,7 @@ jobs:
         run: azd env get-values | grep -E "URL|HOST|NAME" | sed 's/=.*/=<REDACTED>/'
 
       - name: Capture app URL
-        id: capture-app-url
+        id: capture_app_url
         if: github.event.inputs.action != 'down (destroy all resources)'
         run: |
           APP_URL=$(azd env get-values | grep '^TYPESCRIPT_APP_URL=' | cut -d'=' -f2- | tr -d '"')
