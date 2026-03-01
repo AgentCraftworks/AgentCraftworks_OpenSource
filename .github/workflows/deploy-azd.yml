@@ -79,7 +79,11 @@ jobs:
         run: |
           azd env set ghAppId "${{ secrets.GH_APP_ID }}"
           azd env set ghWebhookSecret "${{ secrets.GH_WEBHOOK_SECRET }}"
-          azd env set ghAppPrivateKey "$GH_APP_PRIVATE_KEY_VALUE"
+
+          # Store PEM key as single line to avoid JSON parse errors in parameters.json substitution.
+          # azd env set writes to .env; multiline values break JSON when ${ghAppPrivateKey} is resolved.
+          SINGLE_LINE_KEY=$(printf '%s' "$GH_APP_PRIVATE_KEY_VALUE" | tr '\n' '|' | sed 's/|/\\n/g')
+          azd env set ghAppPrivateKey "$SINGLE_LINE_KEY"
 
           # Prefer a stable password from POSTGRES_PASSWORD secret when provided.
           if [ -n "$POSTGRES_PASSWORD_SECRET" ]; then
