@@ -10,18 +10,6 @@
     },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
-    },
-    "postgresPassword": {
-      "value": "${postgresPassword}"
-    },
-    "ghWebhookSecret": {
-      "value": "${ghWebhookSecret}"
-    },
-    "ghAppId": {
-      "value": "${ghAppId}"
-    },
-    "ghAppPrivateKey": {
-      "value": "${ghAppPrivateKey}"
     }
   }
 }
