@@ -63,14 +63,16 @@ jobs:
             azd env new "$ENV_NAME" \
               --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
               --location "${{ secrets.AZURE_LOCATION }}"
-          azd env set AZURE_ENV_NAME "$ENV_NAME"
+          azd env set environmentName "$ENV_NAME"
           azd env set AZURE_LOCATION "${{ secrets.AZURE_LOCATION }}"
 
       - name: Configure environment secrets
+        env:
+          GH_APP_PRIVATE_KEY_VALUE: ${{ secrets.GH_APP_PRIVATE_KEY }}
         run: |
           azd env set ghAppId "${{ secrets.GH_APP_ID }}"
           azd env set ghWebhookSecret "${{ secrets.GH_WEBHOOK_SECRET }}"
-          azd env set ghAppPrivateKey "${{ secrets.GH_APP_PRIVATE_KEY }}"
+          azd env set ghAppPrivateKey "$GH_APP_PRIVATE_KEY_VALUE"
           azd env set postgresPassword "$(openssl rand -base64 32)"
 
       - name: Run azd (provision + deploy)
