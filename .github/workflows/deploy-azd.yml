@@ -122,7 +122,7 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
-    if: "!contains(github.event.inputs.action, 'down')"
+    if: contains(github.event.inputs.action, 'up') || contains(github.event.inputs.action, 'deploy')
 
     steps:
       - name: Checkout
