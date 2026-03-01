@@ -57,14 +57,20 @@ jobs:
             --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
 
       - name: Select or create azd environment
+        env:
+          ENV_NAME: "agentcraftworks-${{ github.event.inputs.environment }}"
         run: |
-          ENV_NAME="agentcraftworks-${{ github.event.inputs.environment }}"
-          azd env select "$ENV_NAME" 2>/dev/null || \
+          if ! azd env select "$ENV_NAME" 2>/dev/null; then
+            echo "Creating new azd environment: $ENV_NAME"
             azd env new "$ENV_NAME" \
               --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
               --location "${{ secrets.AZURE_LOCATION }}"
+          fi
+
+          echo "Setting environmentName and AZURE_LOCATION..."
           azd env set environmentName "$ENV_NAME"
           azd env set AZURE_LOCATION "${{ secrets.AZURE_LOCATION }}"
+          echo "Done configuring azd environment."
 
       - name: Configure environment secrets
         env:
