@@ -63,6 +63,8 @@ jobs:
             azd env new "$ENV_NAME" \
               --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
               --location "${{ secrets.AZURE_LOCATION }}"
+          azd env set AZURE_LOCATION "${{ secrets.AZURE_LOCATION }}"
+          azd env set environmentName "$ENV_NAME"
 
       - name: Configure environment secrets
         run: |
