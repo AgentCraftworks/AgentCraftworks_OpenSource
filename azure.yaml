@@ -33,5 +33,13 @@ hooks:
   postdeploy:
     shell: sh
     run: |
-      echo "Running smoke tests against production..."
-      cd typescript && npm ci && BASE_URL="${TYPESCRIPT_API_URL}" npx tsx smoke-test.ts
+      APP_URL="${TYPESCRIPT_APP_URL:-}"
+      if [ -z "$APP_URL" ]; then
+        echo "Skipping postdeploy smoke tests: TYPESCRIPT_APP_URL is not set."
+        exit 0
+      fi
+
+      echo "Running smoke tests against deployed app: $APP_URL"
+      cd typescript
+      npm ci
+      BASE_URL="$APP_URL" npx tsx smoke-test.ts
