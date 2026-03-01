@@ -163,7 +163,7 @@ jobs:
           APP_NAME=$(az resource list \
             --resource-group "$RG_NAME" \
             --resource-type "Microsoft.App/containerApps" \
-            --query "[?tags['azd-service-name']=='typescript-api'].name | [0]" \
+            --query "[?tags.\"azd-service-name\"=='typescript-api'].name | [0]" \
             --output tsv)
 
           if [ -z "$APP_NAME" ]; then
