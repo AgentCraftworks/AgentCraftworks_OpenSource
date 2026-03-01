@@ -1,0 +1,109 @@
+name: "GH-AW: Accessibility Review"
+
+# Accessibility Review — Posts an accessibility checklist on PRs that touch UI files.
+# Ensures the accessibility agent team is engaged before any UI change is merged.
+# Engagement Level: T2 (Advisor) — posts comments and labels, no code modifications.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**/*.jsx"
+      - "**/*.tsx"
+      - "**/*.vue"
+      - "**/*.html"
+      - "**/*.css"
+      - "**/*.scss"
+      - "**/*.less"
+      - "**/*.svelte"
+      - "**/*.md"
+
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to post accessibility checklist on"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  accessibility-review:
+    name: Post Accessibility Checklist
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post accessibility checklist on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          # Check if we already posted an accessibility checklist on this PR
+          EXISTING=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json comments \
+            --jq '[.comments[] | select(.body | contains("<!-- ghaw-accessibility-review -->"))] | length' 2>/dev/null || echo "0")
+
+          if [ "$EXISTING" -gt "0" ]; then
+            echo "Accessibility checklist already posted on PR #$PR_NUMBER, skipping."
+            exit 0
+          fi
+
+          cat <<'EOF' > /tmp/ghaw-accessibility-review-comment.md
+<!-- ghaw-accessibility-review -->
+## ♿ Accessibility Review Required
+
+This PR touches UI or documentation files. Please ensure the following accessibility requirements are met before merging.
+
+> ⚠️ **AI tools are not perfect.** Always verify with VoiceOver, NVDA, JAWS, and keyboard-only navigation. This checklist is a starting point, not a substitute for real assistive technology testing.
+
+### Checklist
+
+- [ ] `@accessibility-lead` has reviewed all UI changes ([install agents](https://github.com/Community-Access/accessibility-agents))
+- [ ] All interactive elements are keyboard-accessible (Tab, Arrow keys, Enter, Escape)
+- [ ] Color contrast meets WCAG AA minimums (4.5:1 text, 3:1 UI components/focus indicators)
+- [ ] ARIA roles and states are used correctly (prefer native HTML semantics first)
+- [ ] Focus management is correct for dialogs, modals, and dynamic content
+- [ ] All images have meaningful alt text (or `alt=""` for decorative images)
+- [ ] Forms have associated `<label>` elements and clear, programmatically-associated error messages
+- [ ] Markdown documentation passes `@markdown-a11y-assistant` review (if `.md` files changed)
+- [ ] Changes tested with at least one screen reader (VoiceOver, NVDA, or JAWS)
+
+### Accessibility Agent Team
+
+Run the accessibility agent team locally by tagging `@accessibility-lead` in your AI coding tool (Claude Code, GitHub Copilot, Gemini CLI). The lead will orchestrate the relevant specialists based on what changed.
+
+For installation: `curl -fsSL https://raw.githubusercontent.com/Community-Access/accessibility-agents/main/install.sh | bash`
+
+See [docs/accessibility.md](docs/accessibility.md) for the full accessibility capability documentation.
+
+---
+*Posted by the `ghaw-accessibility-review` workflow. Powered by [Community-Access/accessibility-agents](https://github.com/Community-Access/accessibility-agents).*
+EOF
+
+          gh pr comment "$PR_NUMBER" --repo "$REPOSITORY" --body-file /tmp/ghaw-accessibility-review-comment.md
+          echo "✅ Accessibility checklist posted on PR #$PR_NUMBER"
+
+      - name: Add accessibility-review label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          # Create label if it doesn't exist. This may fail harmlessly if the label already exists
+          # or if the token lacks permission; log a message instead of failing the workflow.
+          if ! gh label create "accessibility-review" \
+            --repo "$REPOSITORY" \
+            --description "PR requires accessibility review before merge" \
+            --color "0075ca"; then
+            echo "ℹ️ Unable to create label 'accessibility-review' (it may already exist or the token lacks permission)." >&2
+          fi
+
+          # Attempt to add the label to the PR and only report success if it actually succeeds.
+          if gh pr edit "$PR_NUMBER" --repo "$REPOSITORY" --add-label "accessibility-review"; then
+            echo "✅ Label 'accessibility-review' added to PR #$PR_NUMBER"
+          else
+            echo "⚠️ Failed to add label 'accessibility-review' to PR #$PR_NUMBER (missing permissions or other error)." >&2
+          fi
