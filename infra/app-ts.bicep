@@ -48,10 +48,16 @@ resource acrPullRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 }
 
 // TypeScript Container App
+// dependsOn ensures RBAC role assignments propagate before the Container App
+// tries to pull secrets from Key Vault or images from ACR via managed identity.
 resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: 'ca-ts-${resourceToken}'
   location: location
   tags: tags
+  dependsOn: [
+    keyVaultSecretsUserRole
+    acrPullRole
+  ]
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
