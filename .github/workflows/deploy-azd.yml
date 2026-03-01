@@ -67,8 +67,8 @@ jobs:
               --location "${{ secrets.AZURE_LOCATION }}"
           fi
 
-          echo "Setting environmentName and AZURE_LOCATION..."
-          azd env set environmentName "$ENV_NAME"
+          echo "Setting environment parameters..."
+          azd env set AZURE_ENV_NAME "$ENV_NAME"
           azd env set AZURE_LOCATION "${{ secrets.AZURE_LOCATION }}"
           echo "Done configuring azd environment."
 
