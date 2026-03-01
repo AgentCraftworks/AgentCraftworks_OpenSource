@@ -361,6 +361,20 @@ Configure these in **Settings → Secrets and variables → Actions → New repo
 | `GH_WEBHOOK_SECRET` | Webhook validation secret (generate: `openssl rand -hex 32`) | Runtime only (not CI/CD) |
 | `POSTGRES_PASSWORD` | PostgreSQL admin password (generate: `openssl rand -base64 32`) | `deploy-azd.yml` |
 
+> **Managing the PostgreSQL password (`POSTGRES_PASSWORD`):**
+> Setting `POSTGRES_PASSWORD` as a GitHub environment secret (in `production`, `staging`, and `dev`)
+> is the **recommended** approach for stable credential management. The `deploy-azd.yml` workflow
+> uses the following priority order:
+>
+> 1. **`POSTGRES_PASSWORD` secret** — used as-is when set; guarantees a stable, known password.
+> 2. **Existing azd environment value** — preserved if already set and no secret is provided;
+>    prevents accidental rotation on `deploy`-only runs.
+> 3. **Auto-generated password** — a random value is generated with `openssl rand -base64 32`
+>    only on the very first provision when neither of the above is available.
+>
+> To set the secret for each environment, go to
+> **Settings → Environments → {environment} → Add secret → `POSTGRES_PASSWORD`**.
+
 ### For deploy-production.yml (Docker-based deploy)
 
 | Secret | Description |
