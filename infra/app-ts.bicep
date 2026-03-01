@@ -8,6 +8,9 @@ param postgresHost string
 param redisHost string
 param redisPort int
 
+@description('Container image to deploy. Defaults to a public placeholder for initial provisioning.')
+param imageName string = ''
+
 // Container Registry reference
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
   name: containerRegistryName
@@ -112,7 +115,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'agentcraftworks-ts'
-          image: '${containerRegistry.properties.loginServer}/agentcraftworks-ts:latest'
+          image: !empty(imageName) ? imageName : 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           resources: {
             cpu: json('0.5')
             memory: '1Gi'
