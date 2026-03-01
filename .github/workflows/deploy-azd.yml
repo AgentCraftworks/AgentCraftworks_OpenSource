@@ -136,6 +136,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     if: contains(github.event.inputs.action, 'up') || contains(github.event.inputs.action, 'deploy')
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -146,13 +149,45 @@ jobs:
         with:
           node-version: 22
 
-      - name: Use app URL from deploy job
-        run: echo "Using deploy job output for app URL."
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve app URL from Azure
+        id: app
+        run: |
+          RG_NAME="rg-agentcraftworks-${{ github.event.inputs.environment }}"
+          APP_NAME=$(az resource list \
+            --resource-group "$RG_NAME" \
+            --resource-type "Microsoft.App/containerApps" \
+            --query "[?tags['azd-service-name']=='typescript-api'].name | [0]" \
+            --output tsv)
+
+          if [ -z "$APP_NAME" ]; then
+            echo "::error::Could not find container app tagged azd-service-name=typescript-api in $RG_NAME"
+            exit 1
+          fi
+
+          APP_FQDN=$(az containerapp show \
+            --resource-group "$RG_NAME" \
+            --name "$APP_NAME" \
+            --query "properties.configuration.ingress.fqdn" \
+            --output tsv)
+
+          if [ -z "$APP_FQDN" ]; then
+            echo "::error::Could not resolve ingress FQDN for $APP_NAME"
+            exit 1
+          fi
+
+          echo "app_url=https://$APP_FQDN" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run smoke tests
         env:
-          BASE_URL: ${{ needs.deploy.outputs.app_url }}
+          BASE_URL: ${{ steps.app.outputs.app_url }}
         run: npx -w typescript tsx smoke-test.ts
