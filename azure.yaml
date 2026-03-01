@@ -18,12 +18,11 @@ services:
 
 # Infrastructure resources
 resources:
-  - name: postgres
+  postgres:
     type: postgres
     uses:
       - typescript-api
-
-  - name: redis
+  redis:
     type: redis
     uses:
       - typescript-api
