@@ -14,7 +14,6 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_CONTAINER_REGISTRY: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
   TYPESCRIPT_IMAGE_NAME: typescript-api
   AZD_SERVICE_NAME: typescript-api
 
@@ -23,6 +22,8 @@ jobs:
     name: Build & Deploy TypeScript Service
     runs-on: ubuntu-latest
     environment: production
+    outputs:
+      app_url: ${{ steps.resolve.outputs.app_url }}
     permissions:
       contents: read
       packages: write
@@ -62,12 +63,75 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Resolve deployment settings
+        id: resolve
+        shell: bash
+        env:
+          ACR_NAME_SECRET: ${{ secrets.AZURE_ACR_NAME }}
+          ACR_LOGIN_SERVER_SECRET: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
+          APP_NAME_SECRET: ${{ secrets.AZURE_CONTAINER_APP_NAME }}
+          RG_NAME_SECRET: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          APP_URL_SECRET: ${{ secrets.TYPESCRIPT_PROD_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$RG_NAME_SECRET" ]; then
+            echo "::error::AZURE_RESOURCE_GROUP secret is required."
+            exit 1
+          fi
+
+          ACR_NAME="$ACR_NAME_SECRET"
+          if [ -z "$ACR_NAME" ]; then
+            ACR_NAME=$(az acr list --resource-group "$RG_NAME_SECRET" --query "[0].name" -o tsv)
+          fi
+          if [ -z "$ACR_NAME" ]; then
+            echo "::error::Could not resolve Azure Container Registry name."
+            exit 1
+          fi
+
+          ACR_LOGIN_SERVER="$ACR_LOGIN_SERVER_SECRET"
+          if [ -z "$ACR_LOGIN_SERVER" ]; then
+            ACR_LOGIN_SERVER=$(az acr show --name "$ACR_NAME" --query "loginServer" -o tsv)
+          fi
+          if [ -z "$ACR_LOGIN_SERVER" ]; then
+            echo "::error::Could not resolve Azure Container Registry login server."
+            exit 1
+          fi
+
+          APP_URL="$APP_URL_SECRET"
+          if [ -z "$APP_URL" ]; then
+            APP_NAME="$APP_NAME_SECRET"
+            if [ -z "$APP_NAME" ]; then
+              APP_NAME=$(az resource list \
+                --resource-group "$RG_NAME_SECRET" \
+                --resource-type "Microsoft.App/containerApps" \
+                --query "[?tags.\"azd-service-name\"=='typescript-api'].name | [0]" \
+                -o tsv)
+            fi
+
+            if [ -n "$APP_NAME" ]; then
+              APP_FQDN=$(az containerapp show --name "$APP_NAME" --resource-group "$RG_NAME_SECRET" --query "properties.configuration.ingress.fqdn" -o tsv)
+              if [ -n "$APP_FQDN" ]; then
+                APP_URL="https://$APP_FQDN"
+              fi
+            fi
+          fi
+
+          if [ -z "$APP_URL" ]; then
+            echo "::error::Could not resolve production app URL for smoke tests."
+            exit 1
+          fi
+
+          echo "acr_name=$ACR_NAME" >> "$GITHUB_OUTPUT"
+          echo "acr_login_server=$ACR_LOGIN_SERVER" >> "$GITHUB_OUTPUT"
+          echo "app_url=$APP_URL" >> "$GITHUB_OUTPUT"
+
       - name: Generate image tags
         id: meta
         run: |
           SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           REF_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9._-]/-/g')
-          TAGS="${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:${REF_NAME} ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:sha-${SHA_SHORT}"
+          TAGS="${{ steps.resolve.outputs.acr_login_server }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:${REF_NAME} ${{ steps.resolve.outputs.acr_login_server }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:sha-${SHA_SHORT}"
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "version=${REF_NAME}" >> $GITHUB_OUTPUT
 
@@ -77,7 +141,7 @@ jobs:
           azcliversion: latest
           inlineScript: |
             az acr build \
-              --registry ${{ secrets.AZURE_ACR_NAME }} \
+              --registry ${{ steps.resolve.outputs.acr_name }} \
               --image ${{ env.TYPESCRIPT_IMAGE_NAME }}:${{ steps.meta.outputs.version }} \
               --image ${{ env.TYPESCRIPT_IMAGE_NAME }}:sha-$(echo "${{ github.sha }}" | cut -c1-7) \
               --file ./typescript/Dockerfile \
@@ -91,7 +155,7 @@ jobs:
             az containerapp update \
               --name ${{ secrets.AZURE_CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --image ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+              --image ${{ steps.resolve.outputs.acr_login_server }}/${{ env.TYPESCRIPT_IMAGE_NAME }}:${{ steps.meta.outputs.version }}
 
   smoke-tests:
     name: Run Smoke Tests
