@@ -454,7 +454,7 @@ Both `main` and `staging` branches are protected with:
   - `build-and-test` — TypeScript compilation, linting, and tests
   - `cla` — Contributor License Agreement check
 - **Additional conditional checks (via rulesets / required workflows):**
-  - `ghaw-accessibility-review` — WCAG 2.2 AA conformance (runs only for relevant UI/content changes)
+  - `ghaw-accessibility-review` — WCAG 2.2 AA conformance (runs on all PRs; posts checklist only when UI/content files are changed)
   - `ghaw-azd-service-tag-check` — Azure service-tag contract validation (runs only for relevant infra changes)
 - **Required reviews:**
   - 1 approving review from CODEOWNERS (enforced)
