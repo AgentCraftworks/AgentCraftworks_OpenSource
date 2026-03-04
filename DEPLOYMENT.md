@@ -547,7 +547,7 @@ To adjust workflow behavior for your organization:
 
 1. **Disable workflows**: Add `if: false` to the job level for any workflow you don't need
 2. **Adjust triggers**: Modify the `on:` block to change when workflows run (e.g., reduce daily schedules to weekly)
-3. **Engagement level overrides**: See `docs/ENGAGEMENT_LEVEL_GOVERNANCE.md` for per-repo and per-environment overrides
+3. **Engagement level overrides**: Configure per-repo and per-environment overrides according to your engagement-level governance documentation
 
 ### Build Process
 
