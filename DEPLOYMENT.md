@@ -522,7 +522,7 @@ services:
 | Workflow | File | Engagement Level | Purpose | Trigger |
 |----------|------|------------------|---------|---------|
 | **Accessibility Review** | `.github/workflows/ghaw-accessibility-review.yml` | T2 (Advisor) | Posts accessibility checklist on PRs touching UI files; tags `@accessibility-lead` for review | PR touching `.jsx`, `.tsx`, `.vue`, `.html`, `.css`, `.scss`, `.less`, `.svelte`, `.md` |
-| **azd Service-Tag Check** | `.github/workflows/ghaw-azd-service-tag-check.yml` | T2 (Advisor) | Validates every service in `azure.yaml` has a matching `azd-service-name` tag in Bicep templates; prevents deploy failures | PR/push to `main` or `staging` touching `azure.yaml` or `infra/**` |
+| **azd Service-Tag Check** | `.github/workflows/ghaw-azd-service-tag-check.yml` | T2 (Advisor) | Validates every service in `azure.yaml` has a matching `azd-service-name` tag in Bicep templates; prevents deploy failures | PR to `main` or `staging` touching `azure.yaml` or `infra/**`; push to `main` touching `azure.yaml` or `infra/**` |
 | **Branch Policy Guard** | `.github/workflows/ghaw-branch-policy-guard.yml` | T1 (Observer) | Enforces promotion flow (`feature/* → staging → main`); blocks PRs that violate branch policy | PR to `main` or `staging` |
 | **Changeset** | `.github/workflows/ghaw-changeset.yml` | T3 (Peer Programmer) | Automated version bumps and changelog generation; analyzes merged PRs, determines semver bump, updates `CHANGELOG.md` | Push to `main`, manual |
 | **CI Coach** | `.github/workflows/ghaw-ci-coach.yml` | T2 (Advisor) | Analyzes CI failures and posts suggested fixes as PR comments | CI workflow failure |
