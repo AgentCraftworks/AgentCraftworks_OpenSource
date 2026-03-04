@@ -61,6 +61,7 @@ Pull Request / Push Event
 | Feature | Description |
 |---|---|
 | **Agent Engagement Levels** | 5-level governance control (Observer → Full Agent Team) — set per-repo, per-team, per-event type |
+| **GH-AW Workflows** | 9 autonomous agent workflows for CI health, accessibility review, branch policy enforcement, test improvement, and more — operating at T1-T3 engagement levels |
 | **MCP 6-Tool Interface** | Standard MCP server: analyze, fix, review, comment, rollback, escalate |
 | **Finite State Machine** | Every agent action is a state transition — auditable, reproducible |
 | **CODEOWNERS Routing** | Events routed to the right agent based on ownership rules |
