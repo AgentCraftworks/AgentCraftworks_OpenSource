@@ -455,6 +455,7 @@ Bootstrap assets for this policy:
 | `APPROVED` | Accepted into the roadmap — implementation not yet started |
 | `SUPERSEDED` | Replaced by a newer document (retained for historical context) |
 
+_Legacy label mapping:_ If you encounter the combined label `DRAFT — FUTURE / UNDER EVALUATION` in older docs, treat it as the canonical status **`UNDER EVALUATION`**.
 ## Always Ask First
 
 Before making significant changes:
