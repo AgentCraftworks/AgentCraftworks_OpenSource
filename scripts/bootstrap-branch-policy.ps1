@@ -48,6 +48,18 @@ function Invoke-GhApi([string]$Method, [string]$Path, [string]$Body = "") {
     }
 }
 
+function Get-ExistingStatusChecks([string]$BranchName) {
+    $raw = gh api "repos/$Repo/branches/$BranchName/protection" 2>$null
+    if (-not $raw) { return $null }
+    $existing = $raw | ConvertFrom-Json
+    if (-not $existing.required_status_checks) { return $null }
+    $sc = $existing.required_status_checks
+    return @{
+        strict   = [bool]$sc.strict
+        contexts = if ($sc.contexts) { @($sc.contexts) } else { @() }
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($Repo)) {
     $Repo = gh repo view --json nameWithOwner -q '.nameWithOwner' 2>$null
 }
@@ -97,8 +109,11 @@ if ($SyncIntegrationFromMain) {
 
 Write-Header "Protect Branches"
 
+$mainStatusChecks    = Get-ExistingStatusChecks -BranchName $DefaultBranch
+$stagingStatusChecks = Get-ExistingStatusChecks -BranchName $IntegrationBranch
+
 $mainProtection = @{
-    required_status_checks = $null
+    required_status_checks = $mainStatusChecks
     enforce_admins = $true
     required_pull_request_reviews = @{
         dismiss_stale_reviews = $true
@@ -117,7 +132,7 @@ $mainProtection = @{
 } | ConvertTo-Json -Depth 6
 
 $stagingProtection = @{
-    required_status_checks = $null
+    required_status_checks = $stagingStatusChecks
     enforce_admins = $true
     required_pull_request_reviews = @{
         dismiss_stale_reviews = $true
