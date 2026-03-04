@@ -426,9 +426,9 @@ Rules:
 
 Bootstrap assets for this policy:
 
-- Script: `scripts/bootstrap-branch-policy.ps1`
-- PR guard workflow: `.github/workflows/ghaw-branch-policy-guard.yml`
-- New repo template: `docs/NEW_REPO_BRANCH_POLICY_TEMPLATE.md`
+- A script to initialize and enforce the branch policy for new repositories
+- A PR guard workflow that blocks merges violating the branch policy
+- A new-repo template or checklist documenting how to apply this policy to fresh projects
 
 ## Documentation Standards — Futures vs Implemented
 
