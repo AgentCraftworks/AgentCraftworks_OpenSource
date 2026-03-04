@@ -10,6 +10,7 @@ Complete guide for deploying AgentCraftworks Community Edition to Azure and runn
 - [Local Development](#local-development)
 - [Azure Deployment](#azure-deployment)
 - [GitHub Secrets for CI/CD](#github-secrets-for-cicd)
+- [Repository Protection Rules](#repository-protection-rules)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Smoke Tests](#smoke-tests)
 - [Production Deployment Checklist](#production-deployment-checklist)
@@ -438,6 +439,57 @@ az ad app federated-credential create --id "$APP_ID" --parameters '{
   "audiences": ["api://AzureADTokenExchange"]
 }'
 ```
+
+---
+
+## Repository Protection Rules
+
+AgentCraftworks Community Edition enforces the following protection rules to ensure quality and stability:
+
+### Branch Protection
+
+Both `main` and `staging` branches are protected with:
+
+- **Required status checks (strict):**
+  - `build-and-test` — TypeScript compilation, linting, and tests
+  - `cla` — Contributor License Agreement check
+  - `ghaw-accessibility-review` — WCAG 2.2 AA conformance
+  - `ghaw-azd-service-tag-check` — Azure service-tag contract validation
+- **Required reviews:**
+  - 1 approving review from CODEOWNERS (enforced)
+  - Stale reviews dismissed on new commits
+- **Admin enforcement:** Enabled (rules apply to admins too)
+- **Force-push:** Blocked
+- **Branch deletion:** Blocked
+
+### Tag Protection
+
+Version tags matching `v*` are protected via repository ruleset (ID: **13516390**):
+
+- **Updates:** Blocked (tags are immutable once created)
+- **Deletion:** Blocked (preserves release history)
+- **Enforcement:** Active
+- **Bypass actors:** None (no exceptions)
+
+### Environment Protection
+
+#### `staging`
+
+- **Required reviewers:** `@AgentCraftworks/maintainers` team approval
+- **Deployment branch policy:** Protected branches only (`main`, `staging`)
+- **Purpose:** Validate changes in a production-like environment before promoting to `main`
+
+#### `production`
+
+- **Required reviewers:** `@AgentCraftworks/maintainers` team approval
+- **Wait timer:** 1 hour (cooldown period to catch urgent issues)
+- **Deployment branch policy:** Protected branches only (`main`, `staging`)
+- **Purpose:** Final gate before customer-visible deployment
+
+> **Note:** Environment protection ensures that only authorized maintainers can approve
+> deployments to staging and production environments. The `deploy-azd.yml` workflow
+> respects these rules automatically when targeting `environment: staging` or
+> `environment: production`.
 
 ---
 
