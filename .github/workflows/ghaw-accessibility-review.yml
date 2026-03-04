@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   accessibility-review:
-    name: Post Accessibility Checklist
+    name: ghaw-accessibility-review
     runs-on: ubuntu-latest
 
     steps:
