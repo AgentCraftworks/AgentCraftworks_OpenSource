@@ -125,7 +125,7 @@ AgentCraftworks also powers enterprise deployments with additional incident resp
 ## Documentation
 
 - [Setup Guide](docs/setup.md)
-- [Agent Engagement Levels Reference](docs/autonomy-dial.md)
+- Agent Engagement Levels Reference
 - [MCP Tool Reference](docs/mcp-tools.md)
 - [Architecture Overview](docs/architecture.md)
 - [Accessibility Capability](docs/accessibility.md)
