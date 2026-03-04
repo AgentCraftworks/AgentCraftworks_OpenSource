@@ -10,7 +10,7 @@
 [![MCP Compatible](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io)
 [![Hackathon](https://img.shields.io/badge/Microsoft%20AI%20Dev%20Days-2026-orange)](https://github.com/Azure/AI-Dev-Days-Hackathon)
 
-[Quick Start](#quick-start) · [How It Works](#how-it-works) · [Enterprise](#enterprise-edition) · [Early Adopters](#early-adopter-program) · [Docs](#documentation) · [Contribute](#contributing)
+[Quick Start](#quick-start) · [How It Works](#how-it-works) · [Enterprise](#enterprise-edition) · [Docs](#documentation) · [Contribute](#contributing)
 
 </div>
 
@@ -120,38 +120,7 @@ AgentCraftworks Community Edition ships a fully compliant Model Context Protocol
 
 ## Enterprise Edition
 
-AgentCraftworks Enterprise adds the reliability and governance layer that production teams need:
-
-| Capability | Community Edition | Enterprise |
-|---|:---:|:---:|
-| Agent Engagement Levels (1–5) | ✅ | ✅ |
-| MCP 6-tool interface | ✅ | ✅ |
-| Webhook + FSM routing | ✅ | ✅ |
-| CODEOWNERS routing | ✅ | ✅ |
-| **Accessibility Enforcement** (WCAG 2.2 AA) | ✅ | ✅ |
-| **SRE Incident Response** | ❌ | ✅ |
-| **Self-Healing Orchestrator** | ❌ | ✅ |
-| **CI Autofix Engine** | ❌ | ✅ |
-| **Chronicle AI Audit Ledger** | ❌ | ✅ |
-| **Governance Monitor** | ❌ | ✅ |
-| **Azure Monitor Integration** | ❌ | ✅ |
-| **Real-time Dashboard** | ❌ | ✅ |
-| **Copilot Agent Dispatch** | ❌ | ✅ |
-| **Enterprise Source Access (ESAP)** | ❌ | ✅ Add-on |
-| SLA + dedicated support | ❌ | ✅ |
-
-**→ [Talk to us about Enterprise](mailto:enterprise@agentcraftworks.com)**
-
-## Early Adopter Program
-
-**We're looking for 5–10 platform engineering teams to beta test AgentCraftworks.**
-
-Early adopters get:
-- Free Community Edition access + **90-day free Enterprise Beta** (invite only)
-- Direct channel with the founding team
-- Early adopter badge + attribution in docs
-
-→ **[Sign up here](https://github.com/AgentCraftworks/AgentCraftworks-CE/issues/new?template=early-adopter-signup.yml)** or see the [Early Adopter Program docs](docs/early-adopters.md) for full details.
+AgentCraftworks also powers enterprise deployments with additional incident response automation, self-healing orchestration, and governance monitoring. Learn more at [AgentCraftworks.com](https://agentcraftworks.com).
 
 ## Documentation
 
@@ -160,7 +129,6 @@ Early adopters get:
 - [MCP Tool Reference](docs/mcp-tools.md)
 - [Architecture Overview](docs/architecture.md)
 - [Accessibility Capability](docs/accessibility.md)
-- [Early Adopter Program](docs/early-adopters.md)
 - [Contributing Guide](CONTRIBUTING.md)
 
 ## Contributing
@@ -187,6 +155,6 @@ See [LICENSE](LICENSE) for full text.
 
 Built with ❤️ for the agentic DevOps era · Powered by Azure + GitHub Copilot
 
-[Enterprise](mailto:enterprise@agentcraftworks.com) · [Early Adopters](https://github.com/AgentCraftworks/AgentCraftworks-CE/issues/new?template=early-adopter-signup.yml) · [Issues](../../issues) · [Discussions](../../discussions)
+[Enterprise](https://agentcraftworks.com) · [Issues](../../issues) · [Discussions](../../discussions)
 
 </div>
