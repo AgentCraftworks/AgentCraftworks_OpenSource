@@ -1,6 +1,6 @@
 <div align="center">
 
-# AgentCraftworks CE
+# AgentCraftworks Community Edition
 
 **The open protocol layer for agentic DevOps**
 
@@ -22,21 +22,21 @@ AI coding agents are powerful — but completely ungoverned. They merge PRs with
 
 **You need a governance layer that grows with your team's trust.**
 
-## What AgentCraftworks CE Does
+## What AgentCraftworks Community Edition Does
 
-AgentCraftworks CE is a GitHub App + MCP server that intercepts every agent action and routes it through a **configurable Autonomy Dial** before it reaches your codebase.
+AgentCraftworks Community Edition is a GitHub App + MCP server that intercepts every agent action and routes it through **configurable Agent Engagement Levels** before it reaches your codebase.
 
 ```
 Pull Request / Push Event
          ↓
-  AgentCraftworks CE
+  AgentCraftworks Community Edition
          ↓
-   Autonomy Dial (1–5)
-    ├── Level 1: Alert only
-    ├── Level 2: Suggest + comment  
-    ├── Level 3: Create fix PR
-    ├── Level 4: Auto-remediate
-    └── Level 5: Full autonomous deploy
+   Agent Engagement Levels (1–5)
+    ├── Observer (T1):        Read, view, list
+    ├── Advisor (T2):         Comment, suggest
+    ├── Peer Programmer (T3): Label, assign, approve, edit file
+    ├── Agent Team (T4):      Merge, close, create branch, push commit
+    └── Full Agent Team (T5): Deploy, modify CI, orchestrate agents
          ↓
   CODEOWNERS Routing → Assigned Agent
          ↓
@@ -49,7 +49,7 @@ Pull Request / Push Event
 
 | Feature | Description |
 |---|---|
-| **Autonomy Dial** | 5-level governance control — set per-repo, per-team, per-event type |
+| **Agent Engagement Levels** | 5-level governance control (Observer → Full Agent Team) — set per-repo, per-team, per-event type |
 | **MCP 6-Tool Interface** | Standard MCP server: analyze, fix, review, comment, rollback, escalate |
 | **Finite State Machine** | Every agent action is a state transition — auditable, reproducible |
 | **CODEOWNERS Routing** | Events routed to the right agent based on ownership rules |
@@ -61,10 +61,10 @@ Pull Request / Push Event
 ```mermaid
 graph TD
     GH[GitHub Events] --> WH[Webhook Handler]
-    WH --> AD[Autonomy Dial FSM]
-    AD -->|Level 1-2| OBS[Observer/Advisor]
-    AD -->|Level 3| PR[Fix PR Creator]
-    AD -->|Level 4-5| AUTO[Auto-Remediation]
+    WH --> AD[Engagement Level Router]
+    AD -->|Observer / Advisor| OBS[Read & Comment]
+    AD -->|Peer Programmer| PR[Label, Assign, Edit]
+    AD -->|Agent Team / Full| AUTO[Merge, Deploy, Orchestrate]
     OBS --> MCP[MCP Server]
     PR --> MCP
     AUTO --> MCP
@@ -96,14 +96,18 @@ npm start
 
 ## How It Works
 
-### 1. Autonomy Dial
-Every repo gets an autonomy level (1–5). The dial determines what the agent is allowed to do:
+### 1. Agent Engagement Levels
+Every repo gets an engagement level (1–5). The level determines what the agent is permitted to do:
 
-- **Level 1 – Observer:** Watch and alert. No action taken.
-- **Level 2 – Advisor:** Post comments and suggestions.
-- **Level 3 – Peer Programmer:** Open fix PRs for human review.
-- **Level 4 – Agent Team:** Auto-remediate with human escalation fallback.
-- **Level 5 – Full Agent Team:** Fully autonomous including deploy.
+| Level | Name | Action Tier | Permitted Actions |
+|-------|------|-------------|-------------------|
+| 1 | Observer | T1 | Read, view, list |
+| 2 | Advisor | T2 | Comment, suggest |
+| 3 | Peer Programmer | T3 | Label, assign, approve, edit file |
+| 4 | Agent Team | T4 | Merge, close, create branch, push commit |
+| 5 | Full Agent Team | T5 | Deploy, modify CI, orchestrate agents |
+
+Environment caps: local=5, dev=5, staging=4, production=3
 
 ### 2. Finite State Machine
 Every incoming event follows a deterministic state machine:
@@ -112,15 +116,15 @@ Every incoming event follows a deterministic state machine:
 This makes every agent action **auditable and reproducible** — essential for enterprise compliance.
 
 ### 3. MCP-Compatible
-CE ships a fully compliant Model Context Protocol (MCP) server. Any MCP-capable AI client (GitHub Copilot, Claude, GPT-4) can connect and use the 6 core tools directly.
+AgentCraftworks Community Edition ships a fully compliant Model Context Protocol (MCP) server. Any MCP-capable AI client (GitHub Copilot, Claude, GPT-4) can connect and use the 6 core tools directly.
 
 ## Enterprise Edition
 
 AgentCraftworks Enterprise adds the reliability and governance layer that production teams need:
 
-| Capability | CE | Enterprise |
+| Capability | Community Edition | Enterprise |
 |---|:---:|:---:|
-| Autonomy Dial (1–5) | ✅ | ✅ |
+| Agent Engagement Levels (1–5) | ✅ | ✅ |
 | MCP 6-tool interface | ✅ | ✅ |
 | Webhook + FSM routing | ✅ | ✅ |
 | CODEOWNERS routing | ✅ | ✅ |
@@ -143,7 +147,7 @@ AgentCraftworks Enterprise adds the reliability and governance layer that produc
 **We're looking for 5–10 platform engineering teams to beta test AgentCraftworks.**
 
 Early adopters get:
-- Free CE access + **90-day free Enterprise Beta** (invite only)
+- Free Community Edition access + **90-day free Enterprise Beta** (invite only)
 - Direct channel with the founding team
 - Early adopter badge + attribution in docs
 
@@ -152,7 +156,7 @@ Early adopters get:
 ## Documentation
 
 - [Setup Guide](docs/setup.md)
-- [Autonomy Dial Reference](docs/autonomy-dial.md)
+- [Agent Engagement Levels Reference](docs/autonomy-dial.md)
 - [MCP Tool Reference](docs/mcp-tools.md)
 - [Architecture Overview](docs/architecture.md)
 - [Accessibility Capability](docs/accessibility.md)

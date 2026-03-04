@@ -40,7 +40,7 @@ You'll be asked for:
 
 The protocol layer:
 
-- Autonomy Dial (levels 1–5)
+- Agent Engagement Levels (Observer → Full Agent Team)
 - MCP 6-tool interface
 - Webhook + FSM routing
 - CODEOWNERS-based agent routing

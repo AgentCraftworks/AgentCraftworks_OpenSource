@@ -13,21 +13,21 @@ graph TD
         WF[Workflow Event]
     end
 
-    subgraph CE["AgentCraftworks CE (Open Source)"]
+    subgraph CE["AgentCraftworks Community Edition (Open Source)"]
         WH[Webhook Handler<br/>POST /api/webhook]
         AUTH[HMAC Signature Verification]
         FSM[Event FSM<br/>RECEIVED → CLASSIFIED → ROUTED → EXECUTING → COMPLETE]
-        AD[Autonomy Dial<br/>Level 1–5]
+        AD[Agent Engagement Levels<br/>Observer → Full Agent Team]
         COD[CODEOWNERS Router]
         MCP[MCP Server<br/>6 Core Tools]
     end
 
     subgraph Actions["Agent Actions"]
-        L1[Level 1: Alert Only]
-        L2[Level 2: Post Comment + Suggest]
-        L3[Level 3: Create Fix PR]
-        L4[Level 4: Auto-Remediate]
-        L5[Level 5: Full Autonomous Deploy]
+        L1[Observer \(T1\): Read, view, list]
+        L2[Advisor \(T2\): Comment, suggest]
+        L3[Peer Programmer \(T3\): Label, assign, approve, edit file]
+        L4[Agent Team \(T4\): Merge, close, create branch, push commit]
+        L5[Full Agent Team \(T5\): Deploy, modify CI, orchestrate agents]
     end
 
     PR --> WH
@@ -66,10 +66,10 @@ graph TD
         AM_LOGS[Log Analytics]
     end
 
-    subgraph CE["AgentCraftworks CE Layer"]
+    subgraph CE["AgentCraftworks Community Edition Layer"]
         WH[Webhook Handler]
         FSM[Event FSM]
-        AD[Autonomy Dial]
+        AD[Engagement Levels]
         COD[CODEOWNERS Router]
         MCP[MCP Server]
     end
@@ -130,7 +130,7 @@ sequenceDiagram
     participant AM as Azure Monitor
     participant SRE as SRE Integration
     participant GOV as Governance Monitor
-    participant AD as Autonomy Dial
+    participant AD as Engagement Levels
     participant SHO as Self-Healing Orchestrator
     participant GH as GitHub API
     participant DEV as Developer
@@ -149,15 +149,17 @@ sequenceDiagram
     SRE->>SRE: Update MTTR metrics
 ```
 
-## Autonomy Dial Reference
+## Agent Engagement Levels Reference
 
-| Level | Name | Allowed Actions | Human Required |
-|---|---|---|---|
-| 1 | Observer | Alert, log | Always |
-| 2 | Advisor | Comment, suggest fix | Always |
-| 3 | Peer Programmer | Open fix PR | For merge |
-| 4 | Agent Team | Auto-merge, rollback | Escalation only |
-| 5 | Full Agent Team | Deploy, scale, remediate | Never |
+| Level | Name | Action Tier | Permitted Actions | Human Required |
+|---|---|---|---|---|
+| 1 | Observer | T1 | Read, view, list | Always |
+| 2 | Advisor | T2 | Comment, suggest | Always |
+| 3 | Peer Programmer | T3 | Label, assign, approve, edit file | For merge |
+| 4 | Agent Team | T4 | Merge, close, create branch, push commit | Escalation only |
+| 5 | Full Agent Team | T5 | Deploy, modify CI, orchestrate agents | Never |
+
+Environment caps: local=5, dev=5, staging=4, production=3
 
 ## Deployment: Azure Container Apps
 
@@ -184,7 +186,7 @@ sequenceDiagram
 | Component | CE | Enterprise |
 |---|:---:|:---:|
 | `webhook-handler.ts` | ✅ | ✅ (extended) |
-| `autonomy-dial.ts` | ✅ | ✅ (extended) |
+| `engagement-levels.ts` | ✅ | ✅ (extended) |
 | `event-fsm.ts` | ✅ | ✅ (extended) |
 | `mcp-server.ts` | ✅ | ✅ (extended) |
 | `codeowners-router.ts` | ✅ | ✅ |
