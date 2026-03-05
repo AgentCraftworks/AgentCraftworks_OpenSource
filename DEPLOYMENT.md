@@ -503,7 +503,7 @@ The repository uses a `.github/CODEOWNERS` file to define required reviewers for
 | `/typescript/src/mcp/` | `@AgentCraftworks/maintainers` |
 | `/.github/workflows/` | `@AgentCraftworks/maintainers` |
 | `/infra/`, `azure.yaml`, `docker-compose.yml` | `@AgentCraftworks/maintainers` |
-| `docs/accessibility.md` | `@AgentCraftworks/accessibility-lead` |
+| `/docs/accessibility.md` | `@AgentCraftworks/accessibility-lead` |
 
 ### CI Workflow Alignment
 
