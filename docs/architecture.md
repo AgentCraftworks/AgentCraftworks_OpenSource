@@ -27,7 +27,7 @@ graph TD
     subgraph CE["AgentCraftworks Community Edition (Open Source)"]
         webhookHandler["Webhook Handler<br/>POST /api/webhook"]
         signatureVerify["HMAC Signature Verification"]
-        eventFsm["Event FSM<br/>RECEIVED → CLASSIFIED → ROUTED → EXECUTING → COMPLETE"]
+        eventFsm["Event FSM<br/>RECEIVED → CLASSIFIED → ROUTED → GOVERNANCE_CHECK → EXECUTING → COMPLETE"]
         engagementLevels["Agent Engagement Levels<br/>Observer → Full Agent Team"]
         codeownersRouter["CODEOWNERS Router"]
         mcpServer["MCP Server<br/>6 Core Tools"]
