@@ -27,7 +27,7 @@ graph TD
     subgraph CE["AgentCraftworks Community Edition (Open Source)"]
         WH[Webhook Handler<br/>POST /api/webhook]
         AUTH[HMAC Signature Verification]
-        FSM[Event FSM<br/>RECEIVED → CLASSIFIED → ROUTED → EXECUTING → COMPLETE]
+        FSM[Event FSM<br/>RECEIVED → CLASSIFIED → ROUTED → GOVERNANCE_CHECK → EXECUTING → COMPLETE]
         AD[Agent Engagement Levels<br/>Observer → Full Agent Team]
         COD[CODEOWNERS Router]
         MCP[MCP Server<br/>6 Core Tools]
