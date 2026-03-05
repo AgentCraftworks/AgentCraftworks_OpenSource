@@ -8,13 +8,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: "PR number to post accessibility checklist on"
-        required: true
-        type: string
-
 permissions:
   contents: read
   pull-requests: write
@@ -54,7 +47,7 @@ jobs:
         if: steps.check-files.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         run: |
           # Check if we already posted an accessibility checklist on this PR
