@@ -25,7 +25,7 @@ jobs:
       - name: Check GitHub App secrets availability
         id: check-secrets
         run: |
-          if [ -n "${{secrets.GH_APP_ID }}" ] && [ -n "${{ secrets.GH_APP_PRIVATE_KEY }}" ]; then
+          if [ -n "${{ secrets.GH_APP_ID }}" ] && [ -n "${{ secrets.GH_APP_PRIVATE_KEY }}" ]; then
             echo "secrets-available=true" >> "$GITHUB_OUTPUT"
           else
             echo "secrets-available=false" >> "$GITHUB_OUTPUT"
