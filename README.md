@@ -61,7 +61,6 @@ Pull Request / Push Event
 | Feature | Description |
 |---|---|
 | **Agent Engagement Levels** | 5-level governance control (Observer → Full Agent Team) — set per-repo, per-team, per-event type |
-| **GH-AW Workflows** | 9 autonomous agent workflows for CI health, accessibility review, branch policy enforcement, test improvement, and more — operating at T1-T3 engagement levels |
 | **MCP 6-Tool Interface** | Standard MCP server: analyze, fix, review, comment, rollback, escalate |
 | **Finite State Machine** | Every agent action is a state transition — auditable, reproducible |
 | **CODEOWNERS Routing** | Events routed to the right agent based on ownership rules |
@@ -95,7 +94,7 @@ npm install
 
 # Configure environment
 cp .env.example .env
-# Add your GitHub App credentials (see docs/setup.md)
+# Add your GitHub App credentials (see Quick Start section above)
 
 # Build and start
 npm run build
@@ -136,9 +135,9 @@ AgentCraftworks also powers enterprise deployments with additional incident resp
 
 ## Documentation
 
-- [Setup Guide](docs/setup.md)
-- Agent Engagement Levels Reference
-- [MCP Tool Reference](docs/mcp-tools.md)
+- [Quick Start Guide](#quick-start)
+- [Agent Engagement Levels Reference](docs/architecture.md#agent-engagement-levels-reference)
+- [MCP Tool Reference](docs/architecture.md)
 - [Architecture Overview](docs/architecture.md)
 - [SDLC Lifecycle Strategy](docs/SDLC_LIFECYCLE_STRATEGY.md)
 - [Accessibility Capability](docs/accessibility.md)
