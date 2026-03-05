@@ -16,7 +16,7 @@ permissions:
   actions: read
 
 jobs:
-  cla:
+  cla_assistant:
     runs-on: ubuntu-latest
     if: |
       (github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA.') ||
