@@ -19,6 +19,7 @@ import {
   scaffoldCodeowners,
   handleInstallationEvent,
   DEFAULT_CODEOWNERS_TEMPLATE,
+  type ScaffoldFn,
   type InstallationPayload,
 } from "../src/handlers/installation.js";
 
@@ -65,6 +66,16 @@ function makeHappyPathOctokit(overrides: Record<string, RequestFn> = {}): Octoki
     }),
     ...overrides,
   });
+}
+
+/**
+ * Create a ScaffoldFn that delegates to `scaffoldCodeowners` using the
+ * provided mock Octokit, so `handleInstallationEvent` tests never touch the
+ * real GitHub API.
+ */
+function makeScaffoldFn(octokit: Octokit): ScaffoldFn {
+  return (owner, repo, installationId) =>
+    scaffoldCodeowners(owner, repo, installationId, octokit);
 }
 
 // ─── codeownersExists ────────────────────────────────────────────────────────
@@ -324,8 +335,15 @@ describe("handleInstallationEvent", () => {
   });
 
   it("reports correct count for multi-repo installations", async () => {
-    // Provide repos but no way to call the real GitHub API — the handler
-    // will capture errors per repo and still return a result.
+    // Both repos are scaffolded via a mock Octokit — no real API calls made.
+    const scaffoldFn = makeScaffoldFn(makeHappyPathOctokit({
+      "POST /repos/{owner}/{repo}/pulls": async (_r, params) => ({
+        data: {
+          html_url: `https://github.com/${params?.["owner"] as string}/${params?.["repo"] as string}/pull/1`,
+        },
+      }),
+    }));
+
     const payload = makePayload("created", {
       repositories: [
         { name: "repo-a", full_name: "testorg/repo-a", private: false },
@@ -333,18 +351,32 @@ describe("handleInstallationEvent", () => {
       ],
     });
 
-    // The handler will attempt real API calls and fail — that's expected here.
-    // We only verify the shape of the result, not API side effects.
-    const result = await handleInstallationEvent(payload);
+    const result = await handleInstallationEvent(payload, scaffoldFn);
 
     assert.equal(result.handled, true);
     assert.equal(result.results.length, 2);
     assert.ok(result.message.includes("2 repositor"));
+    // Both repos should have a PR URL (not skipped, not errored).
+    assert.ok(result.results.every((r) => r.pr_url));
   });
 
   it("isolates errors per repo and continues processing remaining repos", async () => {
-    // Two repos; the second one's full_name is malformed to trigger a split
-    // edge-case without a real network call, but both end up in results.
+    // First repo succeeds; second repo's scaffold throws — handler should
+    // surface both results without re-throwing.
+    let callCount = 0;
+    const scaffoldFn: ScaffoldFn = async (owner, repo) => {
+      callCount++;
+      if (repo === "repo-b") {
+        throw new Error("simulated API failure");
+      }
+      return {
+        repository: `${owner}/${repo}`,
+        skipped: false,
+        pr_url: `https://github.com/${owner}/${repo}/pull/1`,
+        message: "CODEOWNERS PR created",
+      };
+    };
+
     const payload = makePayload("created", {
       repositories: [
         { name: "repo-a", full_name: "testorg/repo-a", private: false },
@@ -352,11 +384,15 @@ describe("handleInstallationEvent", () => {
       ],
     });
 
-    const result = await handleInstallationEvent(payload);
+    const result = await handleInstallationEvent(payload, scaffoldFn);
 
-    // Both repos should appear in results regardless of success/failure.
-    assert.equal(result.results.length, 2);
     assert.equal(result.handled, true);
+    assert.equal(result.results.length, 2);
+    assert.equal(callCount, 2);
+    // First repo succeeded.
+    assert.ok(result.results.some((r) => r.repository === "testorg/repo-a" && r.pr_url));
+    // Second repo captured the error but didn't stop processing.
+    assert.ok(result.results.some((r) => r.repository === "testorg/repo-b" && r.message.includes("simulated API failure")));
   });
 
   it("reports an error for malformed full_name without a slash", async () => {

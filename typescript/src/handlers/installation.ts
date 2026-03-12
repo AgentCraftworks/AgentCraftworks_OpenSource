@@ -42,6 +42,17 @@ export interface ScaffoldResult {
   message: string;
 }
 
+/**
+ * Injectable scaffolding function signature.
+ * Matches {@link scaffoldCodeowners} so tests can provide a mock.
+ */
+export type ScaffoldFn = (
+  owner: string,
+  repo: string,
+  installationId: number,
+  octokit?: Octokit,
+) => Promise<ScaffoldResult>;
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SETUP_BRANCH = "agentcraftworks/setup-codeowners";
@@ -276,9 +287,14 @@ export async function scaffoldCodeowners(
  * {@link scaffoldCodeowners} for each one.  Errors for individual
  * repositories are captured and surfaced in the result list rather than
  * propagated, so a failure for one repo does not block others.
+ *
+ * @param scaffoldFn - Optional override for the scaffolding implementation.
+ *   Defaults to {@link scaffoldCodeowners}.  Pass a custom function in tests
+ *   to avoid real GitHub API calls.
  */
 export async function handleInstallationEvent(
   payload: InstallationPayload,
+  scaffoldFn: ScaffoldFn = scaffoldCodeowners,
 ): Promise<{
   handled: boolean;
   action: string;
@@ -331,7 +347,7 @@ export async function handleInstallationEvent(
     const repoName = parts[1];
 
     try {
-      const result = await scaffoldCodeowners(
+      const result = await scaffoldFn(
         owner,
         repoName,
         installationId,
