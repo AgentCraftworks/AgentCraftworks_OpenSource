@@ -32,6 +32,8 @@ import {
 
 const router = Router();
 
+const VALID_PRIORITIES: ReadonlySet<string> = new Set(["low", "medium", "high", "critical"]);
+
 function paramStr(value: string | string[] | undefined): string | undefined {
   if (Array.isArray(value)) {
     return value[0];
@@ -51,11 +53,20 @@ router.post("/", (req: Request, res: Response): void => {
       return;
     }
 
+    const rawPriority = body["priority"];
+    if (rawPriority != null && (typeof rawPriority !== "string" || !VALID_PRIORITIES.has(rawPriority))) {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "priority must be one of: low, medium, high, critical",
+      });
+      return;
+    }
+
     const handoffData: CreateHandoffInput = {
       task: body["task"] as string,
       to_agent: (body["to_agent"] ?? body["to"]) as string | undefined,
       context: body["context"] as string | undefined,
-      priority: body["priority"] as Priority | undefined,
+      priority: rawPriority as Priority | undefined,
       completed_work: body["completed_work"] as readonly string[] | undefined,
       blockers: body["blockers"] as readonly string[] | undefined,
       outputs: body["outputs"] as Record<string, unknown> | undefined,
