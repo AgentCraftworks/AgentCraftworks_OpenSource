@@ -27,21 +27,6 @@ interface SubIssue {
   closedAt?: string;
 }
 
-function extractParentNumber(title: string): number | null {
-  // Match patterns like "[Original Title] 1/5: Task Name" or "Part of #123"
-  const bracketMatch = title.match(/^\[([^\]]+)\]\s*\d+\/\d+/);
-  if (bracketMatch) {
-    return null; // This is a sub-issue, not a parent
-  }
-
-  const refMatch = title.match(/Part of #(\d+)/i);
-  if (refMatch) {
-    return parseInt(refMatch[1]!, 10);
-  }
-
-  return null;
-}
-
 function isSubIssueOf(subTitle: string, parentTitle: string): boolean {
   // Check if sub-issue title starts with "[Parent Title]"
   const pattern = `[${parentTitle}]`;
