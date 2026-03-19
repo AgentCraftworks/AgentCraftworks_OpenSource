@@ -4,9 +4,9 @@
  * Routes AI agent work based on GitHub PR labels.
  * Used by the PR handler to determine which agent should receive a handoff.
  *
- * Routing logic:
- *   - "accessibility-review" → @accessibility-lead (WCAG 2.2 validation team)
+ * Routing logic (priority order):
  *   - "security-review" → @security-scanner (vulnerability scanning)
+ *   - "accessibility-review" → @accessibility-lead (WCAG 2.2 validation team)
  *   - "docs-review" → @docs-reviewer (documentation updates)
  *   - default → @code-reviewer (general code review)
  */
