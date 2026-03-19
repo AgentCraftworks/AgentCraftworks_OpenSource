@@ -21,11 +21,13 @@ describe("routeToAgentByLabel", () => {
   });
 
   it("returns @code-reviewer for undefined labels", () => {
-    assert.equal(routeToAgentByLabel(undefined as unknown as Array<{ name: string }>), "@code-reviewer");
+    const labels: any = undefined;
+    assert.equal(routeToAgentByLabel(labels), "@code-reviewer");
   });
 
   it("returns @code-reviewer for null labels", () => {
-    assert.equal(routeToAgentByLabel(null as unknown as Array<{ name: string }>), "@code-reviewer");
+    const labels: any = null;
+    assert.equal(routeToAgentByLabel(labels), "@code-reviewer");
   });
 
   // ─── Accessibility routing ───────────────────────────────────────────────
