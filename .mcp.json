@@ -10,7 +10,7 @@
     },
     "azure-mcp": {
       "command": "npx",
-      "args": ["-y", "@azure/mcp@latest"],
+      "args": ["-y", "@azure/mcp@1.0.0"],
       "env": {}
     }
   }
