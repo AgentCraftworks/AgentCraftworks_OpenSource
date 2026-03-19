@@ -96,6 +96,11 @@ describe("routeToAgentByLabel", () => {
       routeToAgentByLabel([{ name: "documentation" }, { name: "accessibility" }]),
       "@accessibility-lead"
     );
+    // security beats docs directly
+    assert.equal(
+      routeToAgentByLabel([{ name: "security" }, { name: "documentation" }]),
+      "@security-scanner"
+    );
     // docs beats default
     assert.equal(
       routeToAgentByLabel([{ name: "documentation" }, { name: "bug" }]),
