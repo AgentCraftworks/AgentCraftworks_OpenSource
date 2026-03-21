@@ -62,55 +62,77 @@ const FAILURE_PATTERNS: FailurePattern[] = [
  */
 async function findRecentCoachComment(
   octokit: InstanceType<typeof Octokit>,
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function findRecentCoachComment(
+  octokit: InstanceType<typeof Octokit>,
   owner: string,
   repo: string,
   issueNumber: number,
 ): Promise<PreviousComment | null> {
-  try {
-    const fiveMinutesAgoIso = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const { data: comments } = await octokit.issues.listComments({
-      owner,
-      repo,
-      issue_number: issueNumber,
-      per_page: 100,
-      since: fiveMinutesAgoIso,
-    });
+  const maxAttempts = 3;
+  let lastError: unknown;
 
-    const coachComments = comments
-      .filter(
-        (c) =>
-          c.user?.login === "github-actions[bot]" &&
-          c.body?.includes("CI Coach Analysis"),
-      )
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const { data: comments } = await octokit.issues.listComments({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        per_page: 100,
+      });
 
-    if (coachComments.length === 0) {
-      return null;
+      const coachComments = comments
+        .filter(
+          (c) =>
+            c.user?.login === "github-actions[bot]" &&
+            c.body?.includes("CI Coach Analysis"),
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
+
+      if (coachComments.length === 0) {
+        return null;
+      }
+
+      const mostRecent = coachComments[0]!;
+      const createdTime = new Date(mostRecent.created_at).getTime();
+      const nowTime = Date.now();
+      const minutesOld = (nowTime - createdTime) / (1000 * 60);
+
+      // Only consider comments from the last 5 minutes
+      if (minutesOld > 5) {
+        return null;
+      }
+
+      // Extract run ID from footer: "<!-- run:12345 -->"
+      const runIdMatch = mostRecent.body?.match(/<!-- run:(\d+) -->/);
+      const runId = runIdMatch ? runIdMatch[1] : null;
+
+      return {
+        id: mostRecent.id,
+        runId,
+        createdAt: mostRecent.created_at,
+      };
+    } catch (err) {
+      lastError = err;
+      if (attempt < maxAttempts) {
+        console.warn(
+          `CI Coach: Failed to fetch recent comments (attempt ${attempt}/${maxAttempts}). Retrying...`,
+        );
+        await delay(1000 * attempt);
+      }
     }
-
-    const mostRecent = coachComments[0]!;
-    const createdTime = new Date(mostRecent.created_at).getTime();
-    const nowTime = Date.now();
-    const minutesOld = (nowTime - createdTime) / (1000 * 60);
-
-    // Only consider comments from the last 5 minutes
-    if (minutesOld > 5) {
-      return null;
-    }
-
-    // Extract run ID from footer: "<!-- run:12345 -->"
-    const runIdMatch = mostRecent.body?.match(/<!-- run:(\d+) -->/);
-    const runId = runIdMatch?.[1] ?? null;
-
-    return {
-      id: mostRecent.id,
-      runId,
-      createdAt: mostRecent.created_at,
-    };
-  } catch (err) {
-    console.log("CI Coach: Could not fetch recent comments. Proceeding with new comment.");
-    return null;
   }
+
+  console.error(
+    "CI Coach: Could not fetch recent comments after multiple attempts. Failing closed to avoid duplicate comments.",
+  );
+  throw lastError instanceof Error ? lastError : new Error("Failed to list comments");
 }
 
 async function main(): Promise<void> {
