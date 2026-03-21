@@ -98,7 +98,7 @@ async function findRecentCoachComment(
 
     // Extract run ID from footer: "<!-- run:12345 -->"
     const runIdMatch = mostRecent.body?.match(/<!-- run:(\d+) -->/);
-    const runId = runIdMatch ? runIdMatch[1] : null;
+    const runId = runIdMatch?.[1] ?? null;
 
     return {
       id: mostRecent.id,
