@@ -78,12 +78,15 @@ async function findRecentCoachComment(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const { data: comments } = await octokit.issues.listComments({
-        owner,
-        repo,
-        issue_number: issueNumber,
-        per_page: 100,
-      });
+      const comments = await octokit.paginate(
+        octokit.issues.listComments,
+        {
+          owner,
+          repo,
+          issue_number: issueNumber,
+          per_page: 100,
+        },
+      );
 
       const coachComments = comments
         .filter(
