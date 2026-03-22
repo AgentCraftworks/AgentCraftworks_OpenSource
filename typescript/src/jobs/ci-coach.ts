@@ -56,14 +56,17 @@ const FAILURE_PATTERNS: FailurePattern[] = [
 ];
 
 /**
- * Find recent CI Coach comments on the PR.
- * Returns the most recent comment if one exists within 5 minutes.
- * Extracts the run ID from the comment footer to detect re-analysis of the same failure.
+ * Utility helper to pause execution for a specified number of milliseconds.
  */
 async function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Find recent CI Coach comments on the PR.
+ * Returns the most recent comment if one exists within 5 minutes.
+ * Extracts the run ID from the comment footer to detect re-analysis of the same failure.
+ */
 async function findRecentCoachComment(
   octokit: InstanceType<typeof Octokit>,
   owner: string,
